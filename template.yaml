@@ -17,6 +17,15 @@ Resources:
       CodeUri: telegram_webhooks/
       Handler: app.lambda_handler
       Runtime: ruby2.7
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:*
+              Resource:
+                - !Ref DynamoDBTable
       Events:
         Webhooks:
           Type: HttpApi

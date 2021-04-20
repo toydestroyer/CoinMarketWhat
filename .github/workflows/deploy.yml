@@ -13,9 +13,6 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install python3.8 jq -y
-      - name: Install Pip Dependencies for CI
-        run: |
-          pip3 install pytest
       - name: Configure AWS credentials
         id: creds
         uses: aws-actions/configure-aws-credentials@v1
@@ -54,9 +51,9 @@ jobs:
       - name: SAM Deploy
         run: |
           # Create S3 Bucket to store code
-          aws s3 mb s3://${{ steps.vars.outputs.environment }}
+          aws s3 mb s3://${{ secrets.S3_BUCKET_NAME }}
           # Run SAM Deploy
           sam deploy --template-file .aws-sam/build/template.yaml \
             --stack-name ${{ steps.vars.outputs.environment }} \
-            --s3-bucket ${{ steps.vars.outputs.environment }} \
+            --s3-bucket ${{ secrets.S3_BUCKET_NAME }} \
             --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM

@@ -54,6 +54,6 @@ jobs:
           # aws s3 mb s3://${{ secrets.S3_BUCKET_NAME }}
           # Run SAM Deploy
           sam deploy --template-file .aws-sam/build/template.yaml \
-            --stack-name ${{ steps.vars.outputs.environment }} \
+            --stack-name CoinMarketWhat \
             --s3-bucket ${{ secrets.S3_BUCKET_NAME }} \
             --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM

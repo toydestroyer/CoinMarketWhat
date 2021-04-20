@@ -7,6 +7,10 @@ Globals:
     Timeout: 3
 
 Resources:
+  DynamoDBTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      TableName: CoinMarketWhatDB
   TelegramWebhooks:
     Type: AWS::Serverless::Function
     Properties:

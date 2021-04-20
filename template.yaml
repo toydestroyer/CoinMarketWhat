@@ -25,7 +25,7 @@ Resources:
               Action:
                 - dynamodb:*
               Resource:
-                - !Ref DynamoDBTable
+                - !GetAtt DynamoDBTable.Arn
       Events:
         Webhooks:
           Type: HttpApi

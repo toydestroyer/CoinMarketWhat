@@ -7,12 +7,25 @@ Globals:
     Timeout: 3
 
 Resources:
+  DynamoDBTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      TableName: CoinMarketWhatDB
   TelegramWebhooks:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: telegram_webhooks/
       Handler: app.lambda_handler
       Runtime: ruby2.7
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:*
+              Resource:
+                - !GetAtt DynamoDBTable.Arn
       Events:
         Webhooks:
           Type: HttpApi

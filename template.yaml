@@ -25,8 +25,8 @@ Outputs:
     Description: "API Gateway endpoint URL for Prod stage for Hello World function"
     Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com/"
   TelegramWebhooks:
-    Description: "Hello World Lambda Function ARN"
-    Value: !GetAtt HelloWorldFunction.Arn
+    Description: "Lambda Function ARN"
+    Value: !GetAtt TelegramWebhooks.Arn
   TelegramWebhooksIamRole:
-    Description: "Implicit IAM Role created for Hello World function"
-    Value: !GetAtt HelloWorldFunctionRole.Arn
+    Description: "Implicit IAM Role created for function"
+    Value: !GetAtt TelegramWebhooksRole.Arn

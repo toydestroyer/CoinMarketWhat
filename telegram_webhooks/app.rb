@@ -14,18 +14,35 @@ def lambda_handler(event:, context:)
 end
 
 def render_inline(query)
-  result = []
-  result << { type: :article, id: SecureRandom.hex, title: "BTC/USDT", thumb_url: "https://dummyimage.com/512x512/ffffff/000000.png&text=BTC/USDT", input_message_content: { message_text: "BTC/USDT" }}
-  result << { type: :article, id: SecureRandom.hex, title: "ETH/USDT", thumb_url: "https://dummyimage.com/512x512/ffffff/000000.png&text=ETH/USDT", input_message_content: { message_text: "ETH/USDT" }}
-  result << { type: :article, id: SecureRandom.hex, title: "ETH/BTC", thumb_url: "https://dummyimage.com/512x512/ffffff/000000.png&text=ETH/USDT", input_message_content: { message_text: "ETH/BTC" }}
-
   RestClient.get("https://api.telegram.org/bot#{token}/answerInlineQuery", params: {
     inline_query_id: query['id'],
-    results: result.to_json,
+    results: build_inline_query_answer(query: query['query']),
     cache_time: 0
   })
 rescue => e
-  puts e.response.to_json
+  puts e.to_json
+end
+
+def build_inline_query_answer(query:)
+  prices = get_binance_prices
+
+  puts prices
+
+  selected = if query.empty?
+    prices.select { |item| ['BTCUSDT', 'ETHUSDT', 'BNBUSDT'].include?(item['symbol']) }
+  else
+    prices.select { |item| item['symbol'].include?(query.upcase) }.first(10)
+  end
+
+  puts selected
+
+  result = selected.map do |symbol|
+    { type: :article, id: SecureRandom.hex, title: "#{symbol['symbol']} — #{symbol['price']}", thumb_url: "https://dummyimage.com/512x512/ffffff/000000.png&text=#{symbol['symbol']}", input_message_content: { message_text: "#{symbol['symbol']} — #{symbol['price']}" }}
+  end
+
+  puts result
+
+  result.to_json
 end
 
 def log_request(event)
@@ -41,6 +58,10 @@ def log_request(event)
       'created_at' => Time.now.to_s
     }
   )
+end
+
+def get_binance_prices
+  JSON.parse(RestClient.get('https://api.binance.com/api/v3/ticker/price').body)
 end
 
 def dynamodb

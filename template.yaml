@@ -8,9 +8,26 @@ Globals:
 
 Resources:
   DynamoDBTable:
-    Type: AWS::Serverless::SimpleTable
+    Type: AWS::DynamoDB::Table
     Properties:
       TableName: CoinMarketWhatDB
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+      AttributeDefinitions:
+        -
+          AttributeName: resource_id
+          AttributeType: S
+        -
+          AttributeName: resource_type
+          AttributeType: S
+      KeySchema:
+        -
+          AttributeName: resource_id
+          KeyType: HASH
+        -
+          AttributeName: resource_type
+          KeyType: RANGE
   TelegramWebhooks:
     Type: AWS::Serverless::Function
     Properties:
@@ -26,12 +43,16 @@ Resources:
                 - dynamodb:*
               Resource:
                 - !GetAtt DynamoDBTable.Arn
+            - Effect: Allow
+              Action:
+                - 'ssm:GetParameter*'
+              Resource: !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/bots/telegram/CoinMarketWhat'
       Events:
         Webhooks:
           Type: HttpApi
           Properties:
             Path: /
-            Method: get
+            Method: post
 
 Outputs:
   WebhooksApi:

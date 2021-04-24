@@ -5,12 +5,35 @@ require 'rest-client'
 
 def lambda_handler(event:, context:)
   log_request(event)
-  render_inline(JSON.parse(event['body'])['inline_query']) if JSON.parse(event['body']).key?('inline_query')
+  body = JSON.parse(event['body'])
+  render_inline(body['inline_query']) if body.key?('inline_query')
+  handle_callback(body['callback_query']) if body.key?('callback_query')
 
   {
     statusCode: 200,
     body: 'ok'
   }
+end
+
+def handle_callback(query)
+  RestClient.get("https://api.telegram.org/bot#{token}/editMessageText", params: {
+    text: SecureRandom.uuid,
+    inline_message_id: query['inline_message_id'],
+    reply_markup: {
+      inline_keyboard: [
+        [
+          { text: 'Binance', callback_data: 'binance' },
+          { text: 'Bitfinex', callback_data: 'bitfinex' },
+          { text: 'CoinMarketCap', callback_data: 'coinmarketcap' },
+        ],
+        [
+          { text: 'USDT', callback_data: 'usdt' },
+          { text: 'BTC', callback_data: 'btc' },
+          { text: 'ETH', callback_data: 'eth' }
+        ]
+      ]
+    }.to_json
+  })
 end
 
 def render_inline(query)
@@ -37,7 +60,29 @@ def build_inline_query_answer(query:)
   puts selected
 
   result = selected.map do |symbol|
-    { type: :article, id: SecureRandom.hex, title: "#{symbol['symbol']} — #{symbol['price']}", thumb_url: "https://dummyimage.com/512x512/ffffff/000000.png&text=#{symbol['symbol']}", input_message_content: { message_text: "#{symbol['symbol']} — #{symbol['price']}" }}
+    {
+      type: :article,
+      id: SecureRandom.hex,
+      title: "#{symbol['symbol']} — #{symbol['price']}",
+      thumb_url: "https://dummyimage.com/512x512/ffffff/000000.png&text=#{symbol['symbol']}",
+      input_message_content: {
+        message_text: "#{symbol['symbol']} — #{symbol['price']}"
+      },
+      reply_markup: {
+        inline_keyboard: [
+          [
+            { text: 'Binance', callback_data: 'binance' },
+            { text: 'Bitfinex', callback_data: 'bitfinex' },
+            { text: 'CoinMarketCap', callback_data: 'coinmarketcap' },
+          ],
+          [
+            { text: 'USDT', callback_data: 'usdt' },
+            { text: 'BTC', callback_data: 'btc' },
+            { text: 'ETH', callback_data: 'eth' }
+          ]
+        ]
+      }
+    }
   end
 
   puts result
@@ -65,11 +110,11 @@ def get_binance_prices
 end
 
 def dynamodb
-  @dynamodb ||= Aws::DynamoDB::Client.new(region: 'ap-southeast-1')
+  @dynamodb ||= Aws::DynamoDB::Client.new(region: 'eu-north-1')
 end
 
 def ssm
-  @ssm ||= Aws::SSM::Client.new(region: 'ap-southeast-1')
+  @ssm ||= Aws::SSM::Client.new(region: 'eu-north-1')
 end
 
 def token

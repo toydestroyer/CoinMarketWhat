@@ -1,0 +1,8 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "CoinMarketWhat"
+s3_prefix = "CoinMarketWhat"
+region = "eu-north-1"
+capabilities = "CAPABILITY_IAM CAPABILITY_NAMED_IAM"

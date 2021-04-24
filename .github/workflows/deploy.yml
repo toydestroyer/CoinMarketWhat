@@ -19,7 +19,6 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-north-1
       - name: SAM Validate
         run: |
           sam validate
@@ -41,7 +40,6 @@ jobs:
           echo "::set-output name=repository::$REPOSITORY"
           echo "::set-output name=environment::$ENVIRONMENT"
           # Output variables to ensure their values are set correctly when ran
-          echo "The region is eu-north-1"
           echo "The repository is $REPOSITORY"
           echo "The environment is $ENVIRONMENT"
           echo "The branch is $BRANCH"

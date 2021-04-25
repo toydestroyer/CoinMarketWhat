@@ -27,33 +27,10 @@ def handle_callback(query)
   price = prices.select { |item| item['symbol'] == current_ticker }[0]['price']
   title = "#{current_state[:base]}/#{current_state[:quote]}"
 
-  avaliable_pairs = binance.available_assets.select { |item| item[:base] == current_state[:base] }
-
-  add_nav = false
-
-  if avaliable_pairs.size > 4
-    avaliable_pairs = avaliable_pairs[current_state[:quote_offset], 3]
-    add_nav = true
-  end
-
-  pairs = avaliable_pairs.map do |item|
-    { text: item[:quote] == current_state[:quote] ? "• #{item[:quote]} •" : item[:quote], callback_data: "#{current_state[:base]}[#{current_state[:base_offset]}]:binance[0]:#{item[:quote]}[#{current_state[:quote_offset]}]" }
-  end
-
-  pairs << { text: '→', callback_data: "#{current_state[:base]}[#{current_state[:base_offset]}]:binance[0]:#{current_state[:quote]}[#{current_state[:quote_offset] + 1}]" } if add_nav
-
-
   RestClient.get("https://api.telegram.org/bot#{token}/editMessageText", params: {
     text: "#{title} — #{price}",
     inline_message_id: query['inline_message_id'],
-    reply_markup: {
-      inline_keyboard: [
-        [
-          { text: '• Binance •', callback_data: "#{current_state[:base]}[#{current_state[:base_offset]}]:binance[#{current_state[:source_offset]}]:#{current_state[:quote]}[#{current_state[:quote_offset]}]" }
-        ],
-        pairs
-      ]
-    }.to_json
+    reply_markup: build_reply_markup(current_state).to_json
   })
 end
 
@@ -63,6 +40,8 @@ def render_inline(query)
     results: build_inline_query_answer(query: query['query']),
     cache_time: 0
   })
+rescue RestClient::ExceptionWithResponse => e
+  puts e.response.to_json
 rescue => e
   puts e.to_json
 end
@@ -81,37 +60,18 @@ def build_inline_query_answer(query:)
     price = prices.select { |item| item['symbol'] == symbol[:ticker] }[0]['price']
     title = "#{symbol[:base]}/#{symbol[:quote]}"
 
-    avaliable_pairs = binance.available_assets.select { |item| item[:base] == symbol[:base] }
-
-    add_nav = false
-
-    if avaliable_pairs.size > 4
-      avaliable_pairs = avaliable_pairs.first(3)
-      add_nav = true
-    end
-
-    pairs = avaliable_pairs.map do |item|
-      { text: item[:quote] == symbol[:quote] ? "• #{item[:quote]} •" : item[:quote], callback_data: "#{symbol[:base]}[0]:binance[0]:#{item[:quote]}[0]" }
-    end
-
-    pairs << { text: '→', callback_data: "null" } if add_nav
+    initial_state = decompose_callback_data("#{symbol[:base]}[0]:binance[0]:#{symbol[:quote]}[0]")
 
     {
       type: :article,
       id: SecureRandom.hex,
-      title: title,
+      title: "#{title}",
+      description: "#{price} @ Binance",
       thumb_url: "https://dummyimage.com/512x512/ffffff/000000.png&text=#{title}",
       input_message_content: {
         message_text: "#{title} — #{price}"
       },
-      reply_markup: {
-        inline_keyboard: [
-          [
-            { text: '• Binance •', callback_data: "#{symbol[:base]}[0]:binance[0]:#{symbol[:quote]}[0]" }
-          ],
-          pairs
-        ]
-      }
+      reply_markup: build_reply_markup(initial_state)
     }
   end
 
@@ -131,8 +91,32 @@ def decompose_callback_data(data)
   }
 end
 
-def build_reply_markup
+def build_reply_markup(state)
+  avaliable_pairs = binance.available_assets.select { |item| item[:base] == state[:base] }
 
+  pagination = false
+
+  # Due to display concerns, I want to limit the number of buttons in the row to 4
+  # If available pairs more than 4 then only 3 will be displayed along with the pagination arrow
+  if avaliable_pairs.size > 4
+    avaliable_pairs = avaliable_pairs[state[:quote_offset], 3]
+    pagination = true
+  end
+
+  pairs = avaliable_pairs.map do |item|
+    { text: item[:quote] == state[:quote] ? "• #{item[:quote]} •" : item[:quote], callback_data: "#{state[:base]}[#{state[:base_offset]}]:#{state[:source]}[#{state[:source_offset]}]:#{item[:quote]}[#{state[:quote_offset]}]" }
+  end
+
+  pairs << { text: '→', callback_data: "#{state[:base]}[#{state[:base_offset]}]:#{state[:source]}[#{state[:source_offset]}]:#{state[:quote]}[#{state[:quote_offset] + 1}]" } if pagination
+
+  {
+    inline_keyboard: [
+      [
+        { text: '• Binance •', callback_data: "#{state[:base]}[#{state[:base_offset]}]:#{state[:source]}[#{state[:source_offset]}]:#{state[:quote]}[#{state[:quote_offset]}]" }
+      ],
+      pairs
+    ]
+  }
 end
 
 def binance
@@ -140,8 +124,7 @@ def binance
 end
 
 def log_request(event)
-  puts event.to_json
-  puts event['body'].to_json
+  puts JSON.parse(event['body'])
 
   dynamodb.put_item(
     table_name: 'CoinMarketWhatDB',

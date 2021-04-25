@@ -3,6 +3,9 @@ require 'aws-sdk-dynamodb'
 require 'aws-sdk-ssm'
 require 'rest-client'
 
+require_relative './data_source/base'
+require_relative './data_source/binance'
+
 def lambda_handler(event:, context:)
   log_request(event)
   body = JSON.parse(event['body'])
@@ -16,21 +19,39 @@ def lambda_handler(event:, context:)
 end
 
 def handle_callback(query)
+  current_state = decompose_callback_data(query['data'])
+
+  current_ticker = binance.available_assets.select { |item| item[:base] == current_state[:base] && item[:quote] == current_state[:quote] }[0][:ticker]
+
+  prices = binance.prices(tickers: [current_ticker])
+  price = prices.select { |item| item['symbol'] == current_ticker }[0]['price']
+  title = "#{current_state[:base]}/#{current_state[:quote]}"
+
+  avaliable_pairs = binance.available_assets.select { |item| item[:base] == current_state[:base] }
+
+  add_nav = false
+
+  if avaliable_pairs.size > 4
+    avaliable_pairs = avaliable_pairs[current_state[:quote_offset], 3]
+    add_nav = true
+  end
+
+  pairs = avaliable_pairs.map do |item|
+    { text: item[:quote] == current_state[:quote] ? "• #{item[:quote]} •" : item[:quote], callback_data: "#{current_state[:base]}[#{current_state[:base_offset]}]:binance[0]:#{item[:quote]}[#{current_state[:quote_offset]}]" }
+  end
+
+  pairs << { text: '→', callback_data: "#{current_state[:base]}[#{current_state[:base_offset]}]:binance[0]:#{current_state[:quote]}[#{current_state[:quote_offset] + 1}]" } if add_nav
+
+
   RestClient.get("https://api.telegram.org/bot#{token}/editMessageText", params: {
-    text: SecureRandom.uuid,
+    text: "#{title} — #{price}",
     inline_message_id: query['inline_message_id'],
     reply_markup: {
       inline_keyboard: [
         [
-          { text: 'Binance', callback_data: 'binance' },
-          { text: 'Bitfinex', callback_data: 'bitfinex' },
-          { text: 'CoinMarketCap', callback_data: 'coinmarketcap' },
+          { text: '• Binance •', callback_data: "#{current_state[:base]}[#{current_state[:base_offset]}]:binance[#{current_state[:source_offset]}]:#{current_state[:quote]}[#{current_state[:quote_offset]}]" }
         ],
-        [
-          { text: 'USDT', callback_data: 'usdt' },
-          { text: 'BTC', callback_data: 'btc' },
-          { text: 'ETH', callback_data: 'eth' }
-        ]
+        pairs
       ]
     }.to_json
   })
@@ -47,47 +68,75 @@ rescue => e
 end
 
 def build_inline_query_answer(query:)
-  prices = get_binance_prices
-
-  puts prices
-
   selected = if query.empty?
-    prices.select { |item| ['BTCUSDT', 'ETHUSDT', 'BNBUSDT'].include?(item['symbol']) }
+    binance.available_assets.first(10)
   else
-    prices.select { |item| item['symbol'].include?(query.upcase) }.first(10)
+    binance.available_assets.select { |item| item[:ticker].include?(query.upcase) }.first(10)
   end
 
-  puts selected
+  selected_tickers = selected.map { |item| item[:ticker] }
+  prices = binance.prices(tickers: selected_tickers)
 
   result = selected.map do |symbol|
+    price = prices.select { |item| item['symbol'] == symbol[:ticker] }[0]['price']
+    title = "#{symbol[:base]}/#{symbol[:quote]}"
+
+    avaliable_pairs = binance.available_assets.select { |item| item[:base] == symbol[:base] }
+
+    add_nav = false
+
+    if avaliable_pairs.size > 4
+      avaliable_pairs = avaliable_pairs.first(3)
+      add_nav = true
+    end
+
+    pairs = avaliable_pairs.map do |item|
+      { text: item[:quote] == symbol[:quote] ? "• #{item[:quote]} •" : item[:quote], callback_data: "#{symbol[:base]}[0]:binance[0]:#{item[:quote]}[0]" }
+    end
+
+    pairs << { text: '→', callback_data: "null" } if add_nav
+
     {
       type: :article,
       id: SecureRandom.hex,
-      title: "#{symbol['symbol']} — #{symbol['price']}",
-      thumb_url: "https://dummyimage.com/512x512/ffffff/000000.png&text=#{symbol['symbol']}",
+      title: title,
+      thumb_url: "https://dummyimage.com/512x512/ffffff/000000.png&text=#{title}",
       input_message_content: {
-        message_text: "#{symbol['symbol']} — #{symbol['price']}"
+        message_text: "#{title} — #{price}"
       },
       reply_markup: {
         inline_keyboard: [
           [
-            { text: 'Binance', callback_data: 'binance' },
-            { text: 'Bitfinex', callback_data: 'bitfinex' },
-            { text: 'CoinMarketCap', callback_data: 'coinmarketcap' },
+            { text: '• Binance •', callback_data: "#{symbol[:base]}[0]:binance[0]:#{symbol[:quote]}[0]" }
           ],
-          [
-            { text: 'USDT', callback_data: 'usdt' },
-            { text: 'BTC', callback_data: 'btc' },
-            { text: 'ETH', callback_data: 'eth' }
-          ]
+          pairs
         ]
       }
     }
   end
 
-  puts result
-
   result.to_json
+end
+
+def decompose_callback_data(data)
+  result = data.split(/^(\w+?)\[(\d+)\]:(\w+?)\[(\d+)\]:(\w+?)\[(\d+)\]$/).drop(1)
+
+  {
+    base: result[0],
+    base_offset: result[1].to_i,
+    source: result[2],
+    source_offset: result[3].to_i,
+    quote: result[4],
+    quote_offset: result[5].to_i
+  }
+end
+
+def build_reply_markup
+
+end
+
+def binance
+  @binance ||= DataSource::Binance.new
 end
 
 def log_request(event)
@@ -103,10 +152,6 @@ def log_request(event)
       'created_at' => Time.now.to_s
     }
   )
-end
-
-def get_binance_prices
-  JSON.parse(RestClient.get('https://api.binance.com/api/v3/ticker/price').body)
 end
 
 def dynamodb

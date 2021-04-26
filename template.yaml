@@ -28,6 +28,10 @@ Resources:
         -
           AttributeName: resource_type
           KeyType: RANGE
+  LogsQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: CoinMarketWhatLogsQueue
   TelegramWebhooks:
     Type: AWS::Serverless::Function
     Properties:
@@ -43,6 +47,11 @@ Resources:
                 - dynamodb:*
               Resource:
                 - !GetAtt DynamoDBTable.Arn
+            - Effect: Allow
+              Action:
+                - sqs:*
+              Resource:
+                - !GetAtt LogsQueue.Arn
             - Effect: Allow
               Action:
                 - 'ssm:GetParameter*'

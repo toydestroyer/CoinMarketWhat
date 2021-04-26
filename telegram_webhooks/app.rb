@@ -1,5 +1,6 @@
 require 'json'
 require 'aws-sdk-dynamodb'
+require 'aws-sdk-sqs'
 require 'aws-sdk-ssm'
 require 'rest-client'
 
@@ -7,8 +8,9 @@ require_relative './data_source/base'
 require_relative './data_source/binance'
 
 def lambda_handler(event:, context:)
-  log_request(event)
   body = JSON.parse(event['body'])
+  log_request(body, event['requestContext']['accountId'])
+
   render_inline(body['inline_query']) if body.key?('inline_query')
   handle_callback(body['callback_query']) if body.key?('callback_query')
 
@@ -123,22 +125,19 @@ def binance
   @binance ||= DataSource::Binance.new
 end
 
-def log_request(event)
-  puts JSON.parse(event['body'])
-
-  dynamodb.put_item(
-    table_name: 'CoinMarketWhatDB',
-    item: {
-      'resource_id' => SecureRandom.uuid,
-      'resource_type' => 'telegram_log',
-      'query' => event['body'],
-      'created_at' => Time.now.to_s
-    }
+def log_request(event, account_id)
+  sqs.send_message(
+    queue_url: "https://sqs.eu-north-1.amazonaws.com/#{account_id}/CoinMarketWhatLogsQueue",
+    message_body: event.to_json
   )
 end
 
 def dynamodb
   @dynamodb ||= Aws::DynamoDB::Client.new(region: 'eu-north-1')
+end
+
+def sqs
+  @sqs ||= Aws::SQS::Client.new(region: 'eu-north-1')
 end
 
 def ssm

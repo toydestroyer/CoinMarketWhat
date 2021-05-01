@@ -7,6 +7,7 @@ require 'money'
 
 require_relative './data_source/base'
 require_relative './data_source/binance'
+require_relative './data_source/coingecko'
 require_relative './data_source/coinmarketcap'
 
 I18n.enforce_available_locales = false
@@ -55,34 +56,46 @@ end
 
 def build_inline_query_answer(query:)
   selected = if query.empty?
-    coinmarketcap.available_assets.first(10)
+    coingecko.available_assets.first(10)
   else
-    coinmarketcap.available_assets.select { |item| item[:symbol].downcase.start_with?(query.downcase) }.first(10)
+    # Get exact match
+    exact_match = coingecko.available_assets.select { |item| item[:symbol].downcase == query.downcase || item[:name].downcase == query.downcase }.first(10)
+
+    partial_match = []
+
+    # There can be a situation when more than 10 coins with the same symbol exist
+    if exact_match.size < 10
+      exact_ids = exact_match.map { |item| item[:id] }
+      partial_match = coingecko.available_assets.select { |item| !exact_ids.include?(item[:id]) && (item[:symbol].downcase.start_with?(query.downcase) || item[:name].downcase.start_with?(query.downcase)) }.first(10 - exact_match.size)
+    end
+
+    exact_match + partial_match
   end
 
   selected_ids = selected.map { |item| item[:id] }
-  prices = coinmarketcap.prices(ids: selected_ids)
+  prices = coingecko.prices(ids: selected_ids)
 
   # puts selected
   puts prices
 
-  result = selected.map do |symbol|
+  result = prices.map do |symbol|
     puts symbol
-    price = prices[symbol[:id].to_s]['quote']['USD']['price']
-    price = Money.from_amount(price, 'USD').format
+    price = Money.from_amount(symbol['current_price'], 'USD').format
 
-    initial_state = decompose_callback_data("#{symbol[:id]}[0]:coinmarketcap[0]:USD[0]")
+    title = "#{symbol['name']} (#{symbol['symbol'].upcase})"
+
+    initial_state = decompose_callback_data("#{symbol['id']}[0]:coingecko[0]:USD[0]")
 
     {
       type: :article,
       id: SecureRandom.hex,
-      title: symbol[:symbol],
-      description: "#{price} @ CoinMarketCap",
-      thumb_url: "https://s2.coinmarketcap.com/static/img/coins/128x128/#{symbol[:id]}.png",
-      thumb_width: 128,
-      thumb_height: 128,
+      title: title,
+      description: "#{price} @ CoinGecko",
+      thumb_url: symbol['image'],
+      thumb_width: 250,
+      thumb_height: 250,
       input_message_content: {
-        message_text: "#{symbol[:symbol]} — #{price}"
+        message_text: "#{title} — #{price}"
       },
       reply_markup: build_reply_markup(initial_state)
     }
@@ -90,6 +103,44 @@ def build_inline_query_answer(query:)
 
   result.to_json
 end
+
+# def build_inline_query_answer(query:)
+#   selected = if query.empty?
+#     coinmarketcap.available_assets.first(10)
+#   else
+#     coinmarketcap.available_assets.select { |item| item[:symbol].downcase.start_with?(query.downcase) }.first(10)
+#   end
+
+#   selected_ids = selected.map { |item| item[:id] }
+#   prices = coinmarketcap.prices(ids: selected_ids)
+
+#   # puts selected
+#   puts prices
+
+#   result = selected.map do |symbol|
+#     puts symbol
+#     price = prices[symbol[:id].to_s]['quote']['USD']['price']
+#     price = Money.from_amount(price, 'USD').format
+
+#     initial_state = decompose_callback_data("#{symbol[:id]}[0]:coinmarketcap[0]:USD[0]")
+
+#     {
+#       type: :article,
+#       id: SecureRandom.hex,
+#       title: symbol[:symbol],
+#       description: "#{price} @ CoinMarketCap",
+#       thumb_url: "https://s2.coinmarketcap.com/static/img/coins/128x128/#{symbol[:id]}.png",
+#       thumb_width: 128,
+#       thumb_height: 128,
+#       input_message_content: {
+#         message_text: "#{symbol[:symbol]} — #{price}"
+#       },
+#       reply_markup: build_reply_markup(initial_state)
+#     }
+#   end
+
+#   result.to_json
+# end
 
 # def build_inline_query_answer(query:)
 #   selected = if query.empty?
@@ -157,7 +208,7 @@ def build_reply_markup(state)
   {
     inline_keyboard: [
       [
-        { text: '• Binance •', callback_data: "#{state[:base]}[#{state[:base_offset]}]:#{state[:source]}[#{state[:source_offset]}]:#{state[:quote]}[#{state[:quote_offset]}]" }
+        { text: "• #{data_sources[state[:source]]} •", callback_data: "#{state[:base]}[#{state[:base_offset]}]:#{state[:source]}[#{state[:source_offset]}]:#{state[:quote]}[#{state[:quote_offset]}]" }
       ],
       pairs
     ]
@@ -172,7 +223,21 @@ def coinmarketcap
   @coinmarketcap ||= DataSource::CoinMarketCap.new(api_key: cmc_api_key)
 end
 
+def coingecko
+  @binance ||= DataSource::CoinGecko.new
+end
+
+def data_sources
+  {
+    'coingecko' => 'CoinGecko',
+    'coinmarketcap' => 'CoinMarketCap',
+    'binance' => 'Binance',
+  }
+end
+
 def log_request(event, account_id)
+  puts event.to_json
+
   sqs.send_message(
     queue_url: "https://sqs.eu-north-1.amazonaws.com/#{account_id}/CoinMarketWhatLogsQueue",
     message_body: event.to_json

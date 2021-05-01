@@ -1,55 +1,57 @@
 module DataSource
   class CoinGecko < Base
-    def prices(ids:)
-      res = RestClient.get(
-        'https://api.coingecko.com/api/v3/coins/markets',
-        {
-          params: {
-            vs_currency: 'USD',
-            ids: ids.join(','),
-            order: 'market_cap_desc'
-          }
-        }
-      )
-
-      JSON.parse(res.body)
-    end
-
-    def load_assets
-      result = []
-      # page = 1
-
-      # loop do
+    class << self
+      def prices(ids:)
         res = RestClient.get(
           'https://api.coingecko.com/api/v3/coins/markets',
           {
             params: {
               vs_currency: 'USD',
-              order: 'market_cap_desc',
-              per_page: '250',
-              # page: page
+              ids: ids.join(','),
+              order: 'market_cap_desc'
             }
           }
         )
 
-        body = JSON.parse(res.body)
+        JSON.parse(res.body)
+      end
 
-        # break if body.empty?
+      def load_assets
+        result = []
+        # page = 1
 
-        result = result + body.map do |item|
-          {
-            id: item['id'],
-            symbol: item['symbol'],
-            name: item['name'],
-            image: item['image'],
-            rank: item['market_cap_rank']
-          }
-        end
+        # loop do
+          res = RestClient.get(
+            'https://api.coingecko.com/api/v3/coins/markets',
+            {
+              params: {
+                vs_currency: 'USD',
+                order: 'market_cap_desc',
+                per_page: '250',
+                # page: page
+              }
+            }
+          )
 
-        # page += 1
-      # end
+          body = JSON.parse(res.body)
 
-      result
+          # break if body.empty?
+
+          result = result + body.map do |item|
+            {
+              id: item['id'],
+              symbol: item['symbol'],
+              name: item['name'],
+              image: item['image'],
+              rank: item['market_cap_rank']
+            }
+          end
+
+          # page += 1
+        # end
+
+        result
+      end
     end
   end
 end

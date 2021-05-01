@@ -3,9 +3,14 @@ require 'aws-sdk-dynamodb'
 require 'aws-sdk-sqs'
 require 'aws-sdk-ssm'
 require 'rest-client'
+require 'money'
 
 require_relative './data_source/base'
 require_relative './data_source/binance'
+require_relative './data_source/coinmarketcap'
+
+I18n.enforce_available_locales = false
+Money.default_infinite_precision = true
 
 def lambda_handler(event:, context:)
   body = JSON.parse(event['body'])
@@ -44,34 +49,40 @@ def render_inline(query)
   })
 rescue RestClient::ExceptionWithResponse => e
   puts e.response.to_json
-rescue => e
-  puts e.to_json
+# rescue => e
+#   puts e.to_json
 end
 
 def build_inline_query_answer(query:)
   selected = if query.empty?
-    binance.available_assets.first(10)
+    coinmarketcap.available_assets.first(10)
   else
-    binance.available_assets.select { |item| item[:ticker].include?(query.upcase) }.first(10)
+    coinmarketcap.available_assets.select { |item| item[:symbol].downcase.start_with?(query.downcase) }.first(10)
   end
 
-  selected_tickers = selected.map { |item| item[:ticker] }
-  prices = binance.prices(tickers: selected_tickers)
+  selected_ids = selected.map { |item| item[:id] }
+  prices = coinmarketcap.prices(ids: selected_ids)
+
+  # puts selected
+  puts prices
 
   result = selected.map do |symbol|
-    price = prices.select { |item| item['symbol'] == symbol[:ticker] }[0]['price']
-    title = "#{symbol[:base]}/#{symbol[:quote]}"
+    puts symbol
+    price = prices[symbol[:id].to_s]['quote']['USD']['price']
+    price = Money.from_amount(price, 'USD').format
 
-    initial_state = decompose_callback_data("#{symbol[:base]}[0]:binance[0]:#{symbol[:quote]}[0]")
+    initial_state = decompose_callback_data("#{symbol[:id]}[0]:coinmarketcap[0]:USD[0]")
 
     {
       type: :article,
       id: SecureRandom.hex,
-      title: "#{title}",
-      description: "#{price} @ Binance",
-      thumb_url: "https://dummyimage.com/512x512/ffffff/000000.png&text=#{title}",
+      title: symbol[:symbol],
+      description: "#{price} @ CoinMarketCap",
+      thumb_url: "https://s2.coinmarketcap.com/static/img/coins/128x128/#{symbol[:id]}.png",
+      thumb_width: 128,
+      thumb_height: 128,
       input_message_content: {
-        message_text: "#{title} — #{price}"
+        message_text: "#{symbol[:symbol]} — #{price}"
       },
       reply_markup: build_reply_markup(initial_state)
     }
@@ -79,6 +90,38 @@ def build_inline_query_answer(query:)
 
   result.to_json
 end
+
+# def build_inline_query_answer(query:)
+#   selected = if query.empty?
+#     binance.available_assets.first(10)
+#   else
+#     binance.available_assets.select { |item| item[:base].downcase.start_with?(query.downcase) }.first(10)
+#   end
+
+#   selected_tickers = selected.map { |item| item[:ticker] }
+#   prices = binance.prices(tickers: selected_tickers)
+
+#   result = selected.map do |symbol|
+#     price = prices.select { |item| item['symbol'] == symbol[:ticker] }[0]['price']
+#     title = "#{symbol[:base]}/#{symbol[:quote]}"
+
+#     initial_state = decompose_callback_data("#{symbol[:base]}[0]:binance[0]:#{symbol[:quote]}[0]")
+
+#     {
+#       type: :article,
+#       id: SecureRandom.hex,
+#       title: "#{title}",
+#       description: "#{price} @ Binance",
+#       thumb_url: "https://dummyimage.com/512x512/ffffff/000000.png&text=#{title}",
+#       input_message_content: {
+#         message_text: "#{title} — #{price}"
+#       },
+#       reply_markup: build_reply_markup(initial_state)
+#     }
+#   end
+
+#   result.to_json
+# end
 
 def decompose_callback_data(data)
   result = data.split(/^(\w+?)\[(\d+)\]:(\w+?)\[(\d+)\]:(\w+?)\[(\d+)\]$/).drop(1)
@@ -125,6 +168,10 @@ def binance
   @binance ||= DataSource::Binance.new
 end
 
+def coinmarketcap
+  @coinmarketcap ||= DataSource::CoinMarketCap.new(api_key: cmc_api_key)
+end
+
 def log_request(event, account_id)
   sqs.send_message(
     queue_url: "https://sqs.eu-north-1.amazonaws.com/#{account_id}/CoinMarketWhatLogsQueue",
@@ -146,4 +193,8 @@ end
 
 def token
   @token ||= ssm.get_parameter(name: '/bots/telegram/CoinMarketWhat').parameter.value
+end
+
+def cmc_api_key
+  @cmc_api_key ||= ssm.get_parameter(name: '/api/coinmarketcap').parameter.value
 end

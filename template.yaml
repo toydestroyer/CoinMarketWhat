@@ -38,6 +38,7 @@ Resources:
       CodeUri: telegram_webhooks/
       Handler: app.lambda_handler
       Runtime: ruby2.7
+      MemorySize: 128
       Policies:
         - AWSLambdaBasicExecutionRole
         - Version: "2012-10-17"
@@ -55,7 +56,7 @@ Resources:
             - Effect: Allow
               Action:
                 - 'ssm:GetParameter*'
-              Resource: !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/bots/telegram/CoinMarketWhat'
+              Resource: !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/*'
       Events:
         Webhooks:
           Type: HttpApi

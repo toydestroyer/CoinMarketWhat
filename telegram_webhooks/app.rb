@@ -56,24 +56,24 @@ end
 
 def build_inline_query_answer(query:)
   selected = if query.empty?
-    coingecko.available_assets.first(10)
+    DataSource::CoinGecko.available_assets.first(10)
   else
     # Get exact match
-    exact_match = coingecko.available_assets.select { |item| item[:symbol].downcase == query.downcase || item[:name].downcase == query.downcase }.first(10)
+    exact_match = DataSource::CoinGecko.available_assets.select { |item| item[:symbol].downcase == query.downcase || item[:name].downcase == query.downcase }.first(10)
 
     partial_match = []
 
     # There can be a situation when more than 10 coins with the same symbol exist
     if exact_match.size < 10
       exact_ids = exact_match.map { |item| item[:id] }
-      partial_match = coingecko.available_assets.select { |item| !exact_ids.include?(item[:id]) && (item[:symbol].downcase.start_with?(query.downcase) || item[:name].downcase.start_with?(query.downcase)) }.first(10 - exact_match.size)
+      partial_match = DataSource::CoinGecko.available_assets.select { |item| !exact_ids.include?(item[:id]) && (item[:symbol].downcase.start_with?(query.downcase) || item[:name].downcase.start_with?(query.downcase)) }.first(10 - exact_match.size)
     end
 
     exact_match + partial_match
   end
 
   selected_ids = selected.map { |item| item[:id] }
-  prices = coingecko.prices(ids: selected_ids)
+  prices = DataSource::CoinGecko.prices(ids: selected_ids)
 
   # puts selected
   puts prices
@@ -188,7 +188,7 @@ def decompose_callback_data(data)
 end
 
 def build_reply_markup(state)
-  avaliable_pairs = binance.available_assets.select { |item| item[:base] == state[:base] }
+  avaliable_pairs = DataSource::Binance.available_assets.select { |item| item[:base] == state[:base] }
 
   pagination = false
 
@@ -208,30 +208,18 @@ def build_reply_markup(state)
   {
     inline_keyboard: [
       [
-        { text: "• #{data_sources[state[:source]]} •", callback_data: "#{state[:base]}[#{state[:base_offset]}]:#{state[:source]}[#{state[:source_offset]}]:#{state[:quote]}[#{state[:quote_offset]}]" }
+        { text: "• #{data_sources_map[state[:source]]} •", callback_data: "#{state[:base]}[#{state[:base_offset]}]:#{state[:source]}[#{state[:source_offset]}]:#{state[:quote]}[#{state[:quote_offset]}]" }
       ],
       pairs
     ]
   }
 end
 
-def binance
-  @binance ||= DataSource::Binance.new
-end
-
-def coinmarketcap
-  @coinmarketcap ||= DataSource::CoinMarketCap.new(api_key: cmc_api_key)
-end
-
-def coingecko
-  @binance ||= DataSource::CoinGecko.new
-end
-
-def data_sources
+def data_sources_map
   {
-    'coingecko' => 'CoinGecko',
-    'coinmarketcap' => 'CoinMarketCap',
-    'binance' => 'Binance',
+    'coingecko' => DataSource::CoinGecko,
+    'coinmarketcap' => DataSource::CoinMarketCap,
+    'binance' => DataSource::Binance
   }
 end
 
@@ -258,8 +246,4 @@ end
 
 def token
   @token ||= ssm.get_parameter(name: '/bots/telegram/CoinMarketWhat').parameter.value
-end
-
-def cmc_api_key
-  @cmc_api_key ||= ssm.get_parameter(name: '/api/coinmarketcap').parameter.value
 end

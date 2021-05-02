@@ -1,12 +1,21 @@
 module DataSource
   class CoinGecko < Base
     class << self
-      def prices(ids:)
+      def name
+        'CoinGecko'
+      end
+
+      # For CoinGecko id is not in use because list of pairs is static
+      def pairs(id:)
+        ['USD', 'EUR', 'CNY', 'JPY', 'KRW']
+      end
+
+      def prices(ids:, quote: 'USD')
         res = RestClient.get(
           'https://api.coingecko.com/api/v3/coins/markets',
           {
             params: {
-              vs_currency: 'USD',
+              vs_currency: quote,
               ids: ids.join(','),
               order: 'market_cap_desc'
             }
@@ -27,7 +36,7 @@ module DataSource
               params: {
                 vs_currency: 'USD',
                 order: 'market_cap_desc',
-                per_page: '250',
+                per_page: '250'
                 # page: page
               }
             }

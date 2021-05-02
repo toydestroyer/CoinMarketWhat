@@ -28,12 +28,11 @@ end
 
 def handle_callback(query)
   current_state = decompose_callback_data(query['data'])
+  data_source = data_sources_map[current_state[:source]]
 
-  current_ticker = binance.available_assets.select { |item| item[:base] == current_state[:base] && item[:quote] == current_state[:quote] }[0][:ticker]
-
-  prices = binance.prices(tickers: [current_ticker])
-  price = prices.select { |item| item['symbol'] == current_ticker }[0]['price']
-  title = "#{current_state[:base]}/#{current_state[:quote]}"
+  symbol = data_source.prices(ids: [current_state[:base]], quote: current_state[:quote])[0]
+  price = Money.from_amount(symbol['current_price'], current_state[:quote]).format
+  title = "#{symbol['name']} (#{symbol['symbol'].upcase})"
 
   RestClient.get("https://api.telegram.org/bot#{token}/editMessageText", params: {
     text: "#{title} — #{price}",
@@ -175,7 +174,7 @@ end
 # end
 
 def decompose_callback_data(data)
-  result = data.split(/^(\w+?)\[(\d+)\]:(\w+?)\[(\d+)\]:(\w+?)\[(\d+)\]$/).drop(1)
+  result = data.split(/^([\w-]+?)\[(\d+)\]:(\w+?)\[(\d+)\]:(\w+?)\[(\d+)\]$/).drop(1)
 
   {
     base: result[0],
@@ -188,7 +187,8 @@ def decompose_callback_data(data)
 end
 
 def build_reply_markup(state)
-  avaliable_pairs = DataSource::Binance.available_assets.select { |item| item[:base] == state[:base] }
+  data_source = data_sources_map[state[:source]]
+  avaliable_pairs = data_source.pairs(id: state[:base])
 
   pagination = false
 
@@ -200,7 +200,7 @@ def build_reply_markup(state)
   end
 
   pairs = avaliable_pairs.map do |item|
-    { text: item[:quote] == state[:quote] ? "• #{item[:quote]} •" : item[:quote], callback_data: "#{state[:base]}[#{state[:base_offset]}]:#{state[:source]}[#{state[:source_offset]}]:#{item[:quote]}[#{state[:quote_offset]}]" }
+    { text: item == state[:quote] ? "• #{item} •" : item, callback_data: "#{state[:base]}[#{state[:base_offset]}]:#{state[:source]}[#{state[:source_offset]}]:#{item}[#{state[:quote_offset]}]" }
   end
 
   pairs << { text: '→', callback_data: "#{state[:base]}[#{state[:base_offset]}]:#{state[:source]}[#{state[:source_offset]}]:#{state[:quote]}[#{state[:quote_offset] + 1}]" } if pagination
@@ -208,7 +208,7 @@ def build_reply_markup(state)
   {
     inline_keyboard: [
       [
-        { text: "• #{data_sources_map[state[:source]]} •", callback_data: "#{state[:base]}[#{state[:base_offset]}]:#{state[:source]}[#{state[:source_offset]}]:#{state[:quote]}[#{state[:quote_offset]}]" }
+        { text: "• #{data_source.name} •", callback_data: "#{state[:base]}[#{state[:base_offset]}]:#{state[:source]}[#{state[:source_offset]}]:#{state[:quote]}[#{state[:quote_offset]}]" }
       ],
       pairs
     ]

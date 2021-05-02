@@ -1,6 +1,10 @@
 module DataSource
   class Binance < Base
     class << self
+      def name
+        'Binance'
+      end
+
       def prices(tickers:)
         res = RestClient.get('https://api.binance.com/api/v3/ticker/price')
 

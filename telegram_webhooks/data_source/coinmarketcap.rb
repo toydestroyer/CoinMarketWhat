@@ -1,6 +1,10 @@
 module DataSource
   class CoinMarketCap < Base
     class << self
+      def name
+        'CoinMarketCap'
+      end
+
       def prices(ids:)
         res = RestClient.get(
           'https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest',

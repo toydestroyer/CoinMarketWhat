@@ -6,6 +6,7 @@ module DataSource
       end
 
       # For CoinGecko id is not in use because list of pairs is static
+      # Full list of supported pairs here https://api.coingecko.com/api/v3/simple/supported_vs_currencies
       def pairs(id:)
         ['USD', 'EUR', 'CNY', 'JPY', 'KRW']
       end

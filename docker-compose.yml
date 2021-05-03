@@ -1,0 +1,9 @@
+version: '3.9'
+services:
+  app:
+    build: .
+    volumes:
+      - .:/app
+      - bundle:/usr/local/bundle
+volumes:
+  bundle:

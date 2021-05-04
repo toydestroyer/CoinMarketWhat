@@ -32,6 +32,8 @@ Resources:
     Type: AWS::SQS::Queue
     Properties:
       QueueName: CoinMarketWhatLogsQueue
+  LogsBucket:
+    Type: AWS::S3::Bucket
   TelegramWebhooks:
     Type: AWS::Serverless::Function
     Properties:
@@ -63,6 +65,30 @@ Resources:
           Properties:
             Path: /
             Method: post
+  SaveLogsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: save_logs/
+      Handler: lambda.handler
+      Runtime: ruby2.7
+      Environment:
+        Variables:
+          S3_BUCKET_NAME: !Ref LogsBucket
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - s3:PutObject
+              Resource: !Sub
+                - ${BucketArn}/*
+                - { BucketArn: !GetAtt LogsBucket.Arn }
+      Events:
+        SQSLogsEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt LogsQueue.Arn
 
 Outputs:
   WebhooksApi:

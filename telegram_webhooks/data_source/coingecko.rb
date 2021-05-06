@@ -55,7 +55,7 @@ module DataSource
 
           break if body.empty?
 
-          result = result + body.map do |item|
+          result += body.map do |item|
             {
               id: item['id'],
               symbol: item['symbol'],

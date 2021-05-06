@@ -9,6 +9,7 @@ require_relative './data_source/base'
 require_relative './data_source/binance'
 require_relative './data_source/coingecko'
 require_relative './data_source/coinmarketcap'
+require_relative './searcher'
 
 I18n.enforce_available_locales = false
 Money.default_infinite_precision = true
@@ -54,22 +55,7 @@ rescue RestClient::ExceptionWithResponse => e
 end
 
 def build_inline_query_answer(query:)
-  selected = if query.empty?
-    DataSource::CoinGecko.available_assets.first(10)
-  else
-    # Get exact match
-    exact_match = DataSource::CoinGecko.available_assets.select { |item| item[:symbol].downcase == query.downcase || item[:name].downcase == query.downcase }.first(10)
-
-    partial_match = []
-
-    # There can be a situation when more than 10 coins with the same symbol exist
-    if exact_match.size < 10
-      exact_ids = exact_match.map { |item| item[:id] }
-      partial_match = DataSource::CoinGecko.available_assets.select { |item| !exact_ids.include?(item[:id]) && (item[:symbol].downcase.start_with?(query.downcase) || item[:name].downcase.start_with?(query.downcase)) }.first(10 - exact_match.size)
-    end
-
-    exact_match + partial_match
-  end
+  selected = Searcher.call(query: query)
 
   selected_ids = selected.map { |item| item[:id] }
   prices = DataSource::CoinGecko.prices(ids: selected_ids)

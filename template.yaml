@@ -34,6 +34,8 @@ Resources:
       QueueName: CoinMarketWhatLogsQueue
   LogsBucket:
     Type: AWS::S3::Bucket
+  CacheBucket:
+    Type: AWS::S3::Bucket
   TelegramWebhooks:
     Type: AWS::Serverless::Function
     Properties:
@@ -89,6 +91,44 @@ Resources:
           Type: SQS
           Properties:
             Queue: !GetAtt LogsQueue.Arn
+  CacheFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: telegram_webhooks/
+      Handler: cache.lambda_handler
+      Runtime: ruby2.7
+      MemorySize: 128
+      Environment:
+        Variables:
+          S3_BUCKET_NAME: !Ref CacheBucket
+      Timeout: 300
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - s3:PutObject
+              Resource: !Sub
+                - ${BucketArn}/*
+                - { BucketArn: !GetAtt CacheBucket.Arn }
+            - Effect: Allow
+              Action:
+                - 'ssm:GetParameter*'
+              Resource: !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/*'
+      # Can these events be combined into one with multiple inputs and the same target?
+      Events:
+        UpdateCoinGeckoCacheEvent:
+          Type: Schedule
+          Properties:
+            Input: '{"data_source": "CoinGecko"}'
+            Schedule: rate(1 day)
+        UpdateCoinMarketCapCacheEvent:
+          Type: Schedule
+          Properties:
+            Enabled: False
+            Input: '{"data_source": "CoinMarketCap"}'
+            Schedule: rate(1 day)
 
 Outputs:
   WebhooksApi:

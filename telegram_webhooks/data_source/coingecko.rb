@@ -62,6 +62,56 @@ module DataSource
 
         result
       end
+
+      def cache_assets(s3:)
+        result = []
+        page = 1
+
+        loop do
+          res = RestClient.get(
+            'https://api.coingecko.com/api/v3/coins/markets',
+            {
+              params: {
+                vs_currency: 'USD',
+                # Sorting by market cap breaks the pagination and produces duplicates with missing assets,
+                # Therefore sorting by id is more reliable
+                order: 'id_asc',
+                per_page: '250',
+                page: page
+              }
+            }
+          )
+
+          body = JSON.parse(res.body)
+
+          break if body.empty?
+
+          result = result + body.map do |item|
+            {
+              id: item['id'],
+              symbol: item['symbol'],
+              name: item['name'],
+              image: item['image'],
+              rank: item['market_cap_rank']
+            }
+          end
+
+          page += 1
+        end
+
+        result = result.sort_by { |i| i[:rank] || 100_000 }
+
+        s3.put_object(
+          key: "#{slug}.json",
+          body: result.to_json,
+          bucket: ENV['S3_BUCKET_NAME'],
+          storage_class: 'ONEZONE_IA',
+          metadata: {
+            count: result.size.to_s,
+            updated_at: Time.now.to_s
+          }
+        )
+      end
     end
   end
 end

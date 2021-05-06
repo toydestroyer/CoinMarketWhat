@@ -8,6 +8,10 @@ gem 'aws-sdk-ssm'
 gem 'rest-client'
 gem 'money'
 
+gem 'rubocop'
+gem 'rubocop-rspec'
+gem 'rubocop-performance'
+
 group :test do
   gem 'rspec'
   gem 'webmock'

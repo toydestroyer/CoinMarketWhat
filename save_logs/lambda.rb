@@ -26,7 +26,7 @@ def handler(event:, context:)
 end
 
 def time_prefix(time)
-  time.strftime("%Y/%m/%d/%H")
+  time.strftime('%Y/%m/%d/%H')
 end
 
 # There are much more possible events, but I want to be in control of which one to store

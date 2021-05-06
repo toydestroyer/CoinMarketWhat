@@ -3,7 +3,9 @@
 require 'json'
 require 'aws-sdk-s3'
 
+# rubocop:disable Lint/UnusedMethodArgument
 def handler(event:, context:)
+  # rubocop:enable Lint/UnusedMethodArgument
   logs = event['Records']
   logs.each do |log|
     body = JSON.parse(log['body'])

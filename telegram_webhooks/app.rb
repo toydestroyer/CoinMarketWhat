@@ -17,7 +17,9 @@ require_relative './searcher'
 I18n.enforce_available_locales = false
 Money.default_infinite_precision = true
 
+# rubocop:disable Lint/UnusedMethodArgument
 def lambda_handler(event:, context:)
+  # rubocop:enable Lint/UnusedMethodArgument
   body = JSON.parse(event['body'])
   log_request(body, event['requestContext']['accountId'])
 

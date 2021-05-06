@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'json'
 require 'aws-sdk-s3'
 require 'rest-client'

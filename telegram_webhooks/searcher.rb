@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 class Searcher
   class << self
     def call(query:)

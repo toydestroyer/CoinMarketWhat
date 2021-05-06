@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module DataSource
   class CoinGecko < Base
     class << self

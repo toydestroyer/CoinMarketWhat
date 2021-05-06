@@ -27,25 +27,31 @@ module DataSource
       end
 
       def load_assets
-        result = []
-        # page = 1
+        JSON.parse(s3.get_object(bucket: ENV['CACHE_BUCKET'], key: "#{slug}.json").body.read)
+      end
 
-        # loop do
+      def cache_assets
+        result = []
+        page = 1
+
+        loop do
           res = RestClient.get(
             'https://api.coingecko.com/api/v3/coins/markets',
             {
               params: {
                 vs_currency: 'USD',
-                order: 'market_cap_desc',
-                per_page: '250'
-                # page: page
+                # Sorting by market cap breaks the pagination and produces duplicates with missing assets,
+                # Therefore sorting by id is more reliable
+                order: 'id_asc',
+                per_page: '250',
+                page: page
               }
             }
           )
 
           body = JSON.parse(res.body)
 
-          # break if body.empty?
+          break if body.empty?
 
           result = result + body.map do |item|
             {
@@ -57,10 +63,22 @@ module DataSource
             }
           end
 
-          # page += 1
-        # end
+          page += 1
+        end
 
-        result
+        # Nulls last
+        result = result.sort_by { |i| i[:rank] || 100_000 }
+
+        s3.put_object(
+          key: "#{slug}.json",
+          body: result.to_json,
+          bucket: ENV['CACHE_BUCKET'],
+          storage_class: 'ONEZONE_IA',
+          metadata: {
+            count: result.size.to_s,
+            updated_at: Time.now.to_s
+          }
+        )
       end
     end
   end

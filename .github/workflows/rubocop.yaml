@@ -1,5 +1,5 @@
-name: RuboCop
-on: [pull_request]
+name: reviewdog
+on: [push, pull_request]
 jobs:
   rubocop:
     name: runner / rubocop
@@ -13,6 +13,4 @@ jobs:
       - name: rubocop
         uses: reviewdog/action-rubocop@v1
         with:
-          rubocop_version: gemfile
-          rubocop_extensions: rubocop-rails:gemfile rubocop-rspec:gemfile
           github_token: ${{ secrets.github_token }}

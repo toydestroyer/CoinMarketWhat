@@ -39,18 +39,18 @@ def handle_callback(query)
   title = "#{symbol['name']} (#{symbol['symbol'].upcase})"
 
   RestClient.get("https://api.telegram.org/bot#{token}/editMessageText", params: {
-    text: "#{title} — #{price}",
-    inline_message_id: query['inline_message_id'],
-    reply_markup: build_reply_markup(current_state).to_json
-  })
+                   text: "#{title} — #{price}",
+                   inline_message_id: query['inline_message_id'],
+                   reply_markup: build_reply_markup(current_state).to_json
+                 })
 end
 
 def render_inline(query)
   RestClient.get("https://api.telegram.org/bot#{token}/answerInlineQuery", params: {
-    inline_query_id: query['id'],
-    results: build_inline_query_answer(query: query['query']),
-    cache_time: 0
-  })
+                   inline_query_id: query['id'],
+                   results: build_inline_query_answer(query: query['query']),
+                   cache_time: 0
+                 })
 rescue RestClient::ExceptionWithResponse => e
   puts e.response.to_json
 # rescue => e

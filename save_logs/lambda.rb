@@ -17,11 +17,11 @@ def handler(event:, context:)
 
     time = Time.at(0, log['attributes']['SentTimestamp'].to_i, :millisecond)
 
-    s3.put_object({
+    s3.put_object(
       body: body[event_type].to_json,
       bucket: ENV['S3_BUCKET_NAME'],
       key: "#{event_type}/#{time_prefix(time)}/#{update_id}.json",
-    })
+    )
   end
 end
 

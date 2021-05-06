@@ -31,7 +31,7 @@ end
 
 # There are much more possible events, but I want to be in control of which one to store
 def allowed_events
-  ['callback_query', 'chosen_inline_result', 'inline_query', 'message']
+  %w[callback_query chosen_inline_result inline_query message]
 end
 
 def s3

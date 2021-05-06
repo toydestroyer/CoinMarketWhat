@@ -51,10 +51,6 @@ module DataSource
           ssm.get_parameter(name: '/api/coinmarketcap').parameter.value
         end
       end
-
-      def cache_assets(s3:)
-        # do nothing
-      end
     end
   end
 end

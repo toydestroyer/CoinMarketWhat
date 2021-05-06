@@ -43,6 +43,9 @@ Resources:
       Handler: app.lambda_handler
       Runtime: ruby2.7
       MemorySize: 128
+      Environment:
+        Variables:
+          CACHE_BUCKET: !Ref CacheBucket
       Policies:
         - AWSLambdaBasicExecutionRole
         - Version: "2012-10-17"
@@ -57,6 +60,12 @@ Resources:
                 - sqs:*
               Resource:
                 - !GetAtt LogsQueue.Arn
+            - Effect: Allow
+              Action:
+                - s3:GetObject
+              Resource: !Sub
+                - ${BucketArn}/*
+                - { BucketArn: !GetAtt CacheBucket.Arn }
             - Effect: Allow
               Action:
                 - 'ssm:GetParameter*'
@@ -100,7 +109,7 @@ Resources:
       MemorySize: 128
       Environment:
         Variables:
-          S3_BUCKET_NAME: !Ref CacheBucket
+          CACHE_BUCKET: !Ref CacheBucket
       Timeout: 300
       Policies:
         - AWSLambdaBasicExecutionRole

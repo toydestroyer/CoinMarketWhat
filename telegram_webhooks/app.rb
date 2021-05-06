@@ -1,6 +1,7 @@
 require 'json'
 require 'aws-sdk-dynamodb'
 require 'aws-sdk-sqs'
+require 'aws-sdk-s3'
 require 'aws-sdk-ssm'
 require 'rest-client'
 require 'money'
@@ -57,7 +58,9 @@ end
 def build_inline_query_answer(query:)
   selected = Searcher.call(query: query)
 
-  selected_ids = selected.map { |item| item[:id] }
+  return [] if selected.empty?
+
+  selected_ids = selected.map { |item| item['id'] }
   prices = DataSource::CoinGecko.prices(ids: selected_ids)
 
   # puts selected

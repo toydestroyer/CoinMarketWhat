@@ -27,43 +27,10 @@ module DataSource
       end
 
       def load_assets
-        result = []
-        # page = 1
-
-        # loop do
-          res = RestClient.get(
-            'https://api.coingecko.com/api/v3/coins/markets',
-            {
-              params: {
-                vs_currency: 'USD',
-                order: 'market_cap_desc',
-                per_page: '250'
-                # page: page
-              }
-            }
-          )
-
-          body = JSON.parse(res.body)
-
-          # break if body.empty?
-
-          result = result + body.map do |item|
-            {
-              id: item['id'],
-              symbol: item['symbol'],
-              name: item['name'],
-              image: item['image'],
-              rank: item['market_cap_rank']
-            }
-          end
-
-          # page += 1
-        # end
-
-        result
+        JSON.parse(s3.get_object(bucket: ENV['CACHE_BUCKET'], key: "#{slug}.json").body.read)
       end
 
-      def cache_assets(s3:)
+      def cache_assets
         result = []
         page = 1
 
@@ -99,12 +66,13 @@ module DataSource
           page += 1
         end
 
+        # Nulls last
         result = result.sort_by { |i| i[:rank] || 100_000 }
 
         s3.put_object(
           key: "#{slug}.json",
           body: result.to_json,
-          bucket: ENV['S3_BUCKET_NAME'],
+          bucket: ENV['CACHE_BUCKET'],
           storage_class: 'ONEZONE_IA',
           metadata: {
             count: result.size.to_s,

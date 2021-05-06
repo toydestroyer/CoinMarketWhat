@@ -4,14 +4,14 @@ class Searcher
       return top if query.empty?
 
       # Get exact match
-      exact_match = DataSource::CoinGecko.available_assets.select { |item| item[:symbol].downcase == query.downcase || item[:name].downcase == query.downcase }.first(10)
+      exact_match = DataSource::CoinGecko.available_assets.select { |item| item['symbol'].downcase == query.downcase || item['name'].downcase == query.downcase }.first(10)
 
       partial_match = []
 
       # There can be a situation when more than 10 coins with the same symbol exist
       if exact_match.size < 10
-        exact_ids = exact_match.map { |item| item[:id] }
-        partial_match = DataSource::CoinGecko.available_assets.select { |item| !exact_ids.include?(item[:id]) && (item[:symbol].downcase.start_with?(query.downcase) || item[:name].downcase.start_with?(query.downcase)) }.first(10 - exact_match.size)
+        exact_ids = exact_match.map { |item| item['id'] }
+        partial_match = DataSource::CoinGecko.available_assets.select { |item| !exact_ids.include?(item['id']) && (item['symbol'].downcase.start_with?(query.downcase) || item['name'].downcase.start_with?(query.downcase)) }.first(10 - exact_match.size)
       end
 
       exact_match + partial_match

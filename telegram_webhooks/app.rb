@@ -53,8 +53,8 @@ def render_inline(query)
                  })
 rescue RestClient::ExceptionWithResponse => e
   puts e.response.to_json
-# rescue => e
-#   puts e.to_json
+  # rescue => e
+  #   puts e.to_json
 end
 
 def build_inline_query_answer(query:)

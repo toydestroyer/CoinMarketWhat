@@ -7,12 +7,12 @@ ruby '~> 2.7.0'
 gem 'aws-sdk-dynamodb'
 gem 'aws-sdk-sqs'
 gem 'aws-sdk-ssm'
-gem 'rest-client'
 gem 'money'
+gem 'rest-client'
 
 gem 'rubocop'
-gem 'rubocop-rspec'
 gem 'rubocop-performance'
+gem 'rubocop-rspec'
 
 group :test do
   gem 'rspec'

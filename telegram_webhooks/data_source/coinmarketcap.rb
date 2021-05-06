@@ -26,7 +26,7 @@ module DataSource
 
       def load_assets
         res = RestClient.get(
-          'https://pro-api.coinmarketcap.com/v1/cryptocurrency/map',{
+          'https://pro-api.coinmarketcap.com/v1/cryptocurrency/map', {
             params: {
               sort: 'cmc_rank'
             },

@@ -51,10 +51,3 @@ Style/AsciiComments:
 Style/IfUnlessModifier:
   Exclude:
     - 'telegram_webhooks/app.rb'
-
-# Offense count: 5
-# Cop supports --auto-correct.
-# Configuration parameters: AutoCorrect, AllowHeredoc, AllowURI, URISchemes, IgnoreCopDirectives, IgnoredPatterns.
-# URISchemes: http, https
-Layout/LineLength:
-  Max: 249

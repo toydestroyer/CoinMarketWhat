@@ -11,9 +11,10 @@ Resources:
     Type: AWS::DynamoDB::Table
     Properties:
       TableName: CoinMarketWhatDB
+      BillingMode: PROVISIONED
       ProvisionedThroughput:
-        ReadCapacityUnits: 5
-        WriteCapacityUnits: 5
+        ReadCapacityUnits: 25
+        WriteCapacityUnits: 25
       AttributeDefinitions:
         -
           AttributeName: resource_id

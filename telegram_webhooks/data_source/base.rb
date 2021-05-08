@@ -14,14 +14,6 @@ module DataSource
       def cache_assets
         # do nothing
       end
-
-      def s3
-        @s3 ||= Aws::S3::Client.new(region: 'eu-north-1')
-      end
-
-      def dynamodb
-        @dynamodb ||= Aws::DynamoDB::Client.new(region: 'eu-north-1')
-      end
     end
   end
 end

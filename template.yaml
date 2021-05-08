@@ -4,7 +4,14 @@ Description: CoinMarketWhat
 
 Globals:
   Function:
+    CodeUri: telegram_webhooks/
+    Runtime: ruby2.7
+    MemorySize: 128
     Timeout: 3
+    Environment:
+      Variables:
+        CACHE_BUCKET: !Ref CacheBucket
+        LOGS_BUCKET: !Ref LogsBucket
 
 Resources:
   DynamoDBTable:
@@ -40,13 +47,7 @@ Resources:
   TelegramWebhooks:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: telegram_webhooks/
-      Handler: app.lambda_handler
-      Runtime: ruby2.7
-      MemorySize: 128
-      Environment:
-        Variables:
-          CACHE_BUCKET: !Ref CacheBucket
+      Handler: lambda.Lambda.webhook
       Policies:
         - AWSLambdaBasicExecutionRole
         - Version: "2012-10-17"
@@ -80,12 +81,7 @@ Resources:
   SaveLogsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: save_logs/
-      Handler: lambda.handler
-      Runtime: ruby2.7
-      Environment:
-        Variables:
-          S3_BUCKET_NAME: !Ref LogsBucket
+      Handler: lambda.Lambda.logger
       Policies:
         - AWSLambdaBasicExecutionRole
         - Version: "2012-10-17"
@@ -104,13 +100,8 @@ Resources:
   CacheFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: telegram_webhooks/
-      Handler: cache.lambda_handler
-      Runtime: ruby2.7
-      MemorySize: 128
-      Environment:
-        Variables:
-          CACHE_BUCKET: !Ref CacheBucket
+      Handler: lambda.Lambda.cache
+      MemorySize: 256
       Timeout: 300
       Policies:
         - AWSLambdaBasicExecutionRole
@@ -126,18 +117,11 @@ Resources:
               Action:
                 - 'ssm:GetParameter*'
               Resource: !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/*'
-      # Can these events be combined into one with multiple inputs and the same target?
       Events:
         UpdateCoinGeckoCacheEvent:
           Type: Schedule
           Properties:
             Input: '{"data_source": "CoinGecko"}'
-            Schedule: rate(1 day)
-        UpdateCoinMarketCapCacheEvent:
-          Type: Schedule
-          Properties:
-            Enabled: False
-            Input: '{"data_source": "CoinMarketCap"}'
             Schedule: rate(1 day)
 
 Outputs:

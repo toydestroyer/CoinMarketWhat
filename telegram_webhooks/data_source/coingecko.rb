@@ -16,6 +16,17 @@ module DataSource
       end
 
       def prices(ids:, quote: 'USD')
+        keys = ids.map { |id| { resource_id: ['coingecko', id, quote].join(':'), resource_type: 'price' } }
+        resp = dynamodb.batch_get_item(
+          request_items: {
+            'CoinMarketWhatDB' => {
+              keys: keys
+            }
+          }
+        )
+
+        puts resp
+
         res = RestClient.get(
           'https://api.coingecko.com/api/v3/coins/markets',
           {
@@ -27,7 +38,30 @@ module DataSource
           }
         )
 
-        JSON.parse(res.body)
+        result = JSON.parse(res.body)
+
+        update = result.map do |item|
+          {
+            put_request: {
+              item: {
+                resource_id: "#{item['id']}:#{slug}:#{quote}",
+                resource_type: 'price',
+                price: item['current_price'],
+                updated_at: Time.now.to_i
+              }
+            }
+          }
+        end
+
+        resp = dynamodb.batch_write_item(
+          request_items: {
+            'CoinMarketWhatDB' => update
+          }
+        )
+
+        puts resp
+
+        result
       end
 
       def load_assets

@@ -12,3 +12,7 @@ AllCops:
 
 Style/Documentation:
   Enabled: false
+
+RSpec/FilePath:
+  CustomTransform:
+    CoinGecko: coingecko

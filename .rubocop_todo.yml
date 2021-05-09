@@ -38,10 +38,3 @@ Metrics/PerceivedComplexity:
 Style/IfUnlessModifier:
   Exclude:
     - 'telegram_webhooks/handler/base.rb'
-
-# Offense count: 5
-# Cop supports --auto-correct.
-# Configuration parameters: AutoCorrect, AllowHeredoc, AllowURI, URISchemes, IgnoreCopDirectives, IgnoredPatterns.
-# URISchemes: http, https
-Layout/LineLength:
-  Max: 249

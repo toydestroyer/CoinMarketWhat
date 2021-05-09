@@ -3,11 +3,6 @@ on: push
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        ruby:
-          - 2.7.3
-          - 3.0.1
     services:
       localstack:
         image: localstack/localstack
@@ -20,7 +15,7 @@ jobs:
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: ${{ matrix.ruby }}
+          ruby-version: 2.7.3
           bundler-cache: true
       - name: bundle install
         run: |

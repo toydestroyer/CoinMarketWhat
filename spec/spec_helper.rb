@@ -37,7 +37,13 @@ RSpec.configure do |config|
   config.shared_context_metadata_behavior = :apply_to_host_groups
 
   config.before(:suite) do
+    # puts "localstack before: #{RestClient.get('http://localstack:4566')}"
+    puts "localhost before: #{RestClient.get('http://localhost:4566')}"
     Lambda.sqs.create_queue(queue_name: 'CoinMarketWhatLogsQueue')
+
+    sleep 10
+    # puts "localstack after: #{RestClient.get('http://localstack:4566')}"
+    puts "localhost after: #{RestClient.get('http://localhost:4566')}"
   end
 
   config.after(:suite) do

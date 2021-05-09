@@ -3,7 +3,7 @@
 require_relative '../telegram_webhooks/lambda'
 require 'webmock/rspec'
 
-WebMock.disable_net_connect!(allow: 'localstack:4566')
+WebMock.disable_net_connect!(allow: 'localstack:4566', allow_localhost: true)
 
 RSpec.configure do |config|
   # rspec-expectations config goes here. You can use an alternate

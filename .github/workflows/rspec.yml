@@ -1,7 +1,7 @@
-name: RSpec
+name: rspec
 on: push
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     services:
       localstack:
@@ -10,7 +10,6 @@ jobs:
           - 4566:4566
         env:
           SERVICES: dynamodb,sqs,s3,ssm
-          DEBUG: 1
     steps:
       - uses: actions/checkout@v2
       - name: Setup Ruby
@@ -18,9 +17,9 @@ jobs:
         with:
           ruby-version: 2.7.3
           bundler-cache: true
-      - name: RSpec
+      - name: rspec
         env:
-          LOCALSTACK: true
+          AWS_ENDPOINT: http://localhost:4566
           AWS_ACCESS_KEY_ID: test
           AWS_SECRET_ACCESS_KEY: test
           AWS_REGION: test

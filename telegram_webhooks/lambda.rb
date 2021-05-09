@@ -76,7 +76,7 @@ class Lambda
   def self.aws_config
     @aws_config ||= begin
       config = { region: ENV['AWS_REGION'] }
-      config[:endpoint] = 'http://localhost:4566' if ENV['LOCALSTACK'] == 'true'
+      config[:endpoint] = ENV['AWS_ENDPOINT'] if ENV.key?('AWS_ENDPOINT')
 
       config
     end

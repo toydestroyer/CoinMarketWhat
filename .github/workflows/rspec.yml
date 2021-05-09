@@ -17,8 +17,8 @@ jobs:
         with:
           ruby-version: 2.7.3
           bundler-cache: true
-      - name: Install jq
-        run: sudo apt install jq
+      - name: Wait for localstack
+        run: test "$(curl -s http://localhost:4566/health | jq '[.services[] == "running"] | all')" == "true"
       - name: rspec
         env:
           AWS_ENDPOINT: http://localhost:4566

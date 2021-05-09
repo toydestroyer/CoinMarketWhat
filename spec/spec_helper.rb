@@ -39,30 +39,34 @@ RSpec.configure do |config|
   config.before(:suite) do
     begin
       puts "localstack before: #{RestClient.get('http://localstack:4566')}"
-    rescue RestClient::ExceptionWithResponse => e
-      puts e.response
+    rescue => e
+      puts e
     end
 
     begin
       puts "localhost before: #{RestClient.get('http://localhost:4566')}"
-    rescue RestClient::ExceptionWithResponse => e
-      puts e.response
+    rescue => e
+      puts e
     end
 
-    Lambda.sqs.create_queue(queue_name: 'CoinMarketWhatLogsQueue')
+    begin
+      Lambda.sqs.create_queue(queue_name: 'CoinMarketWhatLogsQueue')
+    rescue => e
+      puts e
+    end
 
     sleep 10
 
     begin
       puts "localstack after: #{RestClient.get('http://localstack:4566')}"
-    rescue RestClient::ExceptionWithResponse => e
-      puts e.response
+    rescue => e
+      puts e
     end
 
     begin
       puts "localhost after: #{RestClient.get('http://localhost:4566')}"
-    rescue RestClient::ExceptionWithResponse => e
-      puts e.response
+    rescue => e
+      puts e
     end
   end
 

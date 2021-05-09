@@ -8,8 +8,12 @@ RSpec.describe Lambda do
       }
     end
 
-    it 'works' do
-      expect { described_class.webhook(event: event, context: {}) }.to raise_error
+    xit 'works' do
+      expect { described_class.webhook(event: event, context: {}) }.not_to raise_error
     end
+  end
+
+  it 'does not work' do
+    expect(1).to eq(2)
   end
 end

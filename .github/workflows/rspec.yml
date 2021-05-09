@@ -17,11 +17,6 @@ jobs:
         with:
           ruby-version: 2.7.3
           bundler-cache: true
-      - name: bundle install
-        run: |
-          gem update --system
-          gem install bundler
-          bundle install --jobs 4 --retry 3
       - name: RSpec
         env:
           LOCALSTACK: true

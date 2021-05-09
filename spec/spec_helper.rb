@@ -41,6 +41,6 @@ RSpec.configure do |config|
   end
 
   config.after(:suite) do
-    Lambda.sqs.delete_queue(queue_url: 'http://localstack:4566/000000000000/CoinMarketWhatLogsQueue')
+    Lambda.sqs.delete_queue(queue_url: ENV['LOGS_QUEUE'])
   end
 end

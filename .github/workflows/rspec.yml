@@ -1,0 +1,38 @@
+name: RSpec
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ruby:
+          - 2.7.3
+          - 3.0.1
+    services:
+      localstack:
+        image: localstack/localstack
+        ports:
+          - 4566:4566
+        env:
+          SERVICES: dynamodb,sqs,s3,ssm
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+      - name: bundle install
+        run: |
+          gem update --system
+          gem install bundler
+          bundle install --jobs 4 --retry 3
+      - name: RSpec
+        env:
+          LOCALSTACK: true
+          AWS_ACCESS_KEY_ID: test
+          AWS_SECRET_ACCESS_KEY: test
+          AWS_REGION: test
+          LOGS_QUEUE: http://localstack:4566/000000000000/CoinMarketWhatLogsQueue
+        run: |
+          bundle exec rspec

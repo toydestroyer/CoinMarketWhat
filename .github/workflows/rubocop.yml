@@ -1,4 +1,4 @@
-name: reviewdog
+name: rubocop
 on: push
 jobs:
   rubocop:

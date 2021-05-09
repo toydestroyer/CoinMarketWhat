@@ -9,7 +9,7 @@ services:
   app:
     build: .
     environment:
-      - LOCAKSTACK=true
+      - LOCALSTACK=true
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
       - AWS_REGION=test

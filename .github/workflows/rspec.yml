@@ -17,6 +17,9 @@ jobs:
         with:
           ruby-version: 2.7.3
           bundler-cache: true
+      - name: Wait for localstack to start
+        # TODO: Find a better way, like: https://github.com/localstack/localstack/issues/732#issuecomment-799088216
+        run: sleep 5
       - name: rspec
         env:
           AWS_ENDPOINT: http://localhost:4566

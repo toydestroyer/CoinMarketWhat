@@ -10,6 +10,7 @@ jobs:
           - 4566:4566
         env:
           SERVICES: dynamodb,sqs,s3,ssm
+          DEBUG: true
     steps:
       - uses: actions/checkout@v2
       - name: Setup Ruby

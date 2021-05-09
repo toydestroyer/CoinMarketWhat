@@ -10,7 +10,6 @@ jobs:
           - 4566:4566
         env:
           SERVICES: dynamodb,sqs,s3,ssm
-          HOSTNAME: localstack
     steps:
       - uses: actions/checkout@v2
       - name: Setup Ruby

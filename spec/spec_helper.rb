@@ -37,16 +37,9 @@ RSpec.configure do |config|
   config.shared_context_metadata_behavior = :apply_to_host_groups
 
   config.before(:suite) do
-    puts 'localstack before:'
-    begin
-      puts RestClient.get('http://localstack:4566')
-    rescue => e
-      puts e
-    end
-
     puts 'localhost before:'
     begin
-      puts RestClient.get('http://localhost:4566')
+      puts RestClient.get('http://localhost:4566/health')
     rescue => e
       puts e
     end
@@ -59,16 +52,9 @@ RSpec.configure do |config|
 
     sleep 10
 
-    puts 'localstack after'
-    begin
-      puts RestClient.get('http://localstack:4566')
-    rescue => e
-      puts e
-    end
-
     puts 'localhost after'
     begin
-      puts RestClient.get('http://localhost:4566')
+      puts RestClient.get('http://localhost:4566/health')
     rescue => e
       puts e
     end

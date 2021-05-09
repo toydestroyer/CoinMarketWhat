@@ -20,6 +20,7 @@ require_relative './request_logger'
 
 I18n.enforce_available_locales = false
 Money.default_infinite_precision = true
+Money.locale_backend = :currency
 
 class Lambda
   # rubocop:disable Lint/UnusedMethodArgument

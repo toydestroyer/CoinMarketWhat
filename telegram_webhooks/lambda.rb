@@ -25,7 +25,7 @@ class Lambda
   # rubocop:disable Lint/UnusedMethodArgument
   def self.webhook(event:, context:)
     body = JSON.parse(event['body'])
-    RequestLogger.enqueue(body, event['requestContext']['accountId'])
+    RequestLogger.enqueue(body)
 
     Handler::InlineQuery.new(body['inline_query']) if body.key?('inline_query')
     Handler::CallbackQuery.new(body['callback_query']) if body.key?('callback_query')
@@ -46,19 +46,19 @@ class Lambda
   # rubocop:enable Lint/UnusedMethodArgument
 
   def self.dynamodb
-    @dynamodb ||= Aws::DynamoDB::Client.new(region: 'eu-north-1')
+    @dynamodb ||= Aws::DynamoDB::Client.new(aws_config)
   end
 
   def self.sqs
-    @sqs ||= Aws::SQS::Client.new(region: 'eu-north-1')
+    @sqs ||= Aws::SQS::Client.new(aws_config)
   end
 
   def self.s3
-    @s3 ||= Aws::S3::Client.new(region: 'eu-north-1')
+    @s3 ||= Aws::S3::Client.new(aws_config)
   end
 
   def self.ssm
-    @ssm ||= Aws::SSM::Client.new(region: 'eu-north-1')
+    @ssm ||= Aws::SSM::Client.new(aws_config)
   end
 
   def self.token
@@ -70,5 +70,14 @@ class Lambda
       'coingecko' => DataSource::CoinGecko,
       'binance' => DataSource::Binance
     }
+  end
+
+  def self.aws_config
+    @aws_config ||= begin
+      config = { region: ENV['AWS_REGION'] }
+      config[:endpoint] = 'http://localstack:4566' if ENV['LOCALSTACK'] == 'true'
+
+      config
+    end
   end
 end

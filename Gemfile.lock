@@ -14,6 +14,13 @@ GEM
     aws-sdk-dynamodb (1.60.0)
       aws-sdk-core (~> 3, >= 3.112.0)
       aws-sigv4 (~> 1.1)
+    aws-sdk-kms (1.43.0)
+      aws-sdk-core (~> 3, >= 3.112.0)
+      aws-sigv4 (~> 1.1)
+    aws-sdk-s3 (1.94.1)
+      aws-sdk-core (~> 3, >= 3.112.0)
+      aws-sdk-kms (~> 1)
+      aws-sigv4 (~> 1.1)
     aws-sdk-sqs (1.38.0)
       aws-sdk-core (~> 3, >= 3.112.0)
       aws-sigv4 (~> 1.1)
@@ -94,12 +101,11 @@ GEM
       hashdiff (>= 0.4.0, < 2.0.0)
 
 PLATFORMS
-  ruby
-  x86_64-darwin-20
   x86_64-linux
 
 DEPENDENCIES
   aws-sdk-dynamodb
+  aws-sdk-s3
   aws-sdk-sqs
   aws-sdk-ssm
   money
@@ -111,7 +117,7 @@ DEPENDENCIES
   webmock
 
 RUBY VERSION
-   ruby 2.7.2p137
+   ruby 2.7.3p183
 
 BUNDLED WITH
    2.2.17

@@ -11,13 +11,13 @@ module DataSource
       # Full list of supported pairs here https://api.coingecko.com/api/v3/simple/supported_vs_currencies
       # rubocop:disable Lint/UnusedMethodArgument
       def pairs(id:)
-        # rubocop:enable Lint/UnusedMethodArgument
         %w[USD EUR CNY JPY KRW]
       end
+      # rubocop:enable Lint/UnusedMethodArgument
 
       def prices(ids:, quote: 'USD')
         keys = ids.map { |id| { resource_id: ['coingecko', id, quote].join(':'), resource_type: 'price' } }
-        resp = dynamodb.batch_get_item(
+        resp = Lambda.dynamodb.batch_get_item(
           request_items: {
             'CoinMarketWhatDB' => {
               keys: keys
@@ -53,7 +53,7 @@ module DataSource
           }
         end
 
-        resp = dynamodb.batch_write_item(
+        resp = Lambda.dynamodb.batch_write_item(
           request_items: {
             'CoinMarketWhatDB' => update
           }
@@ -65,7 +65,7 @@ module DataSource
       end
 
       def load_assets
-        JSON.parse(s3.get_object(bucket: ENV['CACHE_BUCKET'], key: "#{slug}.json").body.read)
+        JSON.parse(Lambda.s3.get_object(bucket: ENV['CACHE_BUCKET'], key: "#{slug}.json").body.read)
       end
 
       def cache_assets
@@ -107,7 +107,7 @@ module DataSource
         # Nulls last
         result = result.sort_by { |i| i[:rank] || 100_000 }
 
-        s3.put_object(
+        Lambda.s3.put_object(
           key: "#{slug}.json",
           body: result.to_json,
           bucket: ENV['CACHE_BUCKET'],

@@ -1,9 +1,23 @@
 version: '3.9'
 services:
+  localstack:
+    image: localstack/localstack
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=dynamodb,sqs,s3,ssm
   app:
     build: .
+    environment:
+      - LOCAKSTACK=true
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_REGION=test
+      - LOGS_QUEUE=http://localstack:4566/000000000000/CoinMarketWhatLogsQueue
     volumes:
       - .:/app
       - bundle:/usr/local/bundle
+    depends_on:
+    - localstack
 volumes:
   bundle:

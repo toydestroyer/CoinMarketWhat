@@ -12,6 +12,7 @@ Globals:
       Variables:
         CACHE_BUCKET: !Ref CacheBucket
         LOGS_BUCKET: !Ref LogsBucket
+        LOGS_QUEUE: !Ref LogsQueue
 
 Resources:
   DynamoDBTable:

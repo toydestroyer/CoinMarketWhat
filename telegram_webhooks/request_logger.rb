@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 class RequestLogger
-  def self.enqueue(event, account_id)
+  def self.enqueue(event)
     puts event.to_json
 
     Lambda.sqs.send_message(
-      queue_url: "https://sqs.eu-north-1.amazonaws.com/#{account_id}/CoinMarketWhatLogsQueue",
+      queue_url: ENV['LOGS_QUEUE'],
       message_body: event.to_json
     )
   end

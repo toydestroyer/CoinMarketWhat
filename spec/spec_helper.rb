@@ -37,30 +37,10 @@ RSpec.configure do |config|
   config.shared_context_metadata_behavior = :apply_to_host_groups
 
   config.before(:suite) do
-    puts 'localhost before:'
-    begin
-      puts RestClient.get('http://localhost:4566/health')
-    rescue => e
-      puts e
-    end
-
-    begin
-      Lambda.sqs.create_queue(queue_name: 'CoinMarketWhatLogsQueue')
-    rescue => e
-      puts e
-    end
-
-    sleep 10
-
-    puts 'localhost after'
-    begin
-      puts RestClient.get('http://localhost:4566/health')
-    rescue => e
-      puts e
-    end
+    Lambda.sqs.create_queue(queue_name: 'CoinMarketWhatLogsQueue')
   end
 
   config.after(:suite) do
-    # Lambda.sqs.delete_queue(queue_url: ENV['LOGS_QUEUE'])
+    Lambda.sqs.delete_queue(queue_url: ENV['LOGS_QUEUE'])
   end
 end

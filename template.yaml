@@ -45,6 +45,17 @@ Resources:
     Type: AWS::S3::Bucket
   CacheBucket:
     Type: AWS::S3::Bucket
+  WebhooksApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      Auth:
+        ResourcePolicy:
+          # According to https://core.telegram.org/bots/webhooks
+          # Telegram is sending webhooks from these ranges
+          IpRangeWhitelist:
+            - "149.154.160.0/20"
+            - "91.108.4.0/22"
   TelegramWebhooks:
     Type: AWS::Serverless::Function
     Properties:
@@ -75,8 +86,9 @@ Resources:
               Resource: !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/*'
       Events:
         Webhooks:
-          Type: HttpApi
+          Type: Api
           Properties:
+            RestApiId: !Ref WebhooksApi
             Path: /
             Method: post
   SaveLogsFunction:
@@ -127,11 +139,5 @@ Resources:
 
 Outputs:
   WebhooksApi:
-    Description: "API Gateway endpoint URL for Prod stage for Hello World function"
-    Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com/"
-  TelegramWebhooks:
-    Description: "Lambda Function ARN"
-    Value: !GetAtt TelegramWebhooks.Arn
-  TelegramWebhooksIamRole:
-    Description: "Implicit IAM Role created for function"
-    Value: !GetAtt TelegramWebhooksRole.Arn
+    Description: "API Gateway endpoint URL for Prod stage for Telegram Webhooks function"
+    Value: !Sub "https://${WebhooksApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"

@@ -1,8 +1,13 @@
 version = 0.1
-[default]
-[default.deploy]
-[default.deploy.parameters]
+
+[default.global.parameters]
 stack_name = "CoinMarketWhat"
-s3_prefix = "CoinMarketWhat"
 region = "eu-north-1"
+
+[default.deploy.parameters]
+s3_prefix = "CoinMarketWhat"
 capabilities = "CAPABILITY_IAM CAPABILITY_NAMED_IAM"
+
+[default.logs.parameters]
+name = "TelegramWebhooks"
+tail = "true"

@@ -16,3 +16,8 @@ Style/Documentation:
 RSpec/FilePath:
   CustomTransform:
     CoinGecko: coingecko
+
+Metrics/BlockLength:
+  IgnoredMethods:
+    - describe
+    - context

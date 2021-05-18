@@ -6,12 +6,14 @@ RSpec.describe Lambda do
 
     let(:event) { { 'body' => body.to_json } }
 
+    before do
+      allow(RequestLogger).to receive(:enqueue)
+      allow(Handler::InlineQuery).to receive(:new)
+      allow(Handler::CallbackQuery).to receive(:new)
+    end
+
     context 'with any event' do
       let(:body) { { random: 'param' } }
-
-      before do
-        allow(RequestLogger).to receive(:enqueue)
-      end
 
       it 'not raise an error' do
         expect { result }.not_to raise_error
@@ -24,7 +26,27 @@ RSpec.describe Lambda do
       it 'sends log to queue' do
         result
 
-        expect(RequestLogger).to have_received(:enqueue).with({ 'random' => 'param' })
+        expect(RequestLogger).to have_received(:enqueue).with('random' => 'param')
+      end
+    end
+
+    context 'with inline_query' do
+      let(:body) { { inline_query: { some: :thing } } }
+
+      it 'handles the event' do
+        result
+
+        expect(Handler::InlineQuery).to have_received(:new).with('some' => 'thing')
+      end
+    end
+
+    context 'with callback_query' do
+      let(:body) { { callback_query: { some: :thing } } }
+
+      it 'handles the event' do
+        result
+
+        expect(Handler::CallbackQuery).to have_received(:new).with('some' => 'thing')
       end
     end
   end

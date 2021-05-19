@@ -32,6 +32,10 @@ class Lambda
     Handler::CallbackQuery.new(body['callback_query']) if body.key?('callback_query')
 
     { statusCode: 200, body: 'ok' }
+  rescue RestClient::ExceptionWithResponse => e
+    puts e.response.to_json
+
+    raise e
   end
 
   def self.cache(event:, context:)

@@ -8,10 +8,6 @@ module Handler
                        results: build_inline_query_answer(query: query['query']),
                        cache_time: 0
                      })
-    rescue RestClient::ExceptionWithResponse => e
-      puts e.response.to_json
-
-      raise e
     end
   end
 end

@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# rubocop:disable Metrics/ClassLength
 module DataSource
   class CoinGecko < Base
     class << self
@@ -137,10 +138,11 @@ module DataSource
             'name' => price['name'],
             'symbol' => price['symbol'],
             'id' => price['id'],
-            'image' => price['image'],
+            'image' => price['image']
           }
         end
       end
     end
   end
 end
+# rubocop:enable Metrics/ClassLength

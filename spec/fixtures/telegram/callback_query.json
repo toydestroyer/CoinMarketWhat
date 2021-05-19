@@ -1,0 +1,17 @@
+{
+  "update_id": 1,
+  "callback_query": {
+    "id": "1",
+    "from": {
+      "id": 1,
+      "is_bot": false,
+      "first_name": "Satoshi",
+      "last_name": "Nakamoto",
+      "username": "username",
+      "language_code": "en"
+    },
+    "inline_message_id": "1",
+    "chat_instance": "1",
+    "data": "bitcoin[0]:coingecko[0]:USD[0]"
+  }
+}

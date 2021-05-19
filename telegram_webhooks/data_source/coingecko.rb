@@ -16,16 +16,9 @@ module DataSource
       # rubocop:enable Lint/UnusedMethodArgument
 
       def prices(ids:, quote: 'USD')
-        keys = ids.map { |id| { resource_id: ['coingecko', id, quote].join(':'), resource_type: 'price' } }
-        resp = Lambda.dynamodb.batch_get_item(
-          request_items: {
-            'CoinMarketWhatDB' => {
-              keys: keys
-            }
-          }
-        )
+        valid_prices = fetch_cached_prices(ids: ids, quote: quote)
 
-        puts resp
+        return render_cached_prices(valid_prices) if valid_prices.size == ids.size
 
         res = RestClient.get(
           'https://api.coingecko.com/api/v3/coins/markets',
@@ -47,19 +40,21 @@ module DataSource
                 resource_id: "#{item['id']}:#{slug}:#{quote}",
                 resource_type: 'price',
                 price: item['current_price'],
-                updated_at: Time.now.to_i
+                name: item['name'],
+                symbol: item['symbol'],
+                id: item['id'],
+                image: item['image'],
+                valid_to: Time.now.to_i + 60
               }
             }
           }
         end
 
-        resp = Lambda.dynamodb.batch_write_item(
+        Lambda.dynamodb.batch_write_item(
           request_items: {
             'CoinMarketWhatDB' => update
           }
         )
-
-        puts resp
 
         result
       end
@@ -117,6 +112,34 @@ module DataSource
             updated_at: Time.now.to_s
           }
         )
+      end
+
+      private
+
+      def fetch_cached_prices(ids:, quote:)
+        keys = ids.map { |id| { resource_id: [id, slug, quote].join(':'), resource_type: 'price' } }
+        resp = Lambda.dynamodb.batch_get_item(
+          request_items: {
+            'CoinMarketWhatDB' => {
+              keys: keys
+            }
+          }
+        )
+
+        # TODO: Find a way to filter it out in dyanmo directly
+        resp.responses['CoinMarketWhatDB'].select { |item| Time.now.to_i < item['valid_to'].to_i }
+      end
+
+      def render_cached_prices(prices)
+        prices.map do |price|
+          {
+            'current_price' => price['price'].to_f,
+            'name' => price['name'],
+            'symbol' => price['symbol'],
+            'id' => price['id'],
+            'image' => price['image'],
+          }
+        end
       end
     end
   end

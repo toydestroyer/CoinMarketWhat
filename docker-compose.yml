@@ -9,11 +9,13 @@ services:
   app:
     build: .
     environment:
-      - AWS_ENDPOINT=http://localstack:4566
+      - LOCALSTACK_ENDPOINT=http://localstack:4566
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
       - AWS_REGION=test
       - LOGS_QUEUE=http://localstack:4566/000000000000/CoinMarketWhatLogsQueue
+      - LOGS_BUCKET=logs-bucket
+      - CACHE_BUCKET=cache-bucket
     volumes:
       - .:/app
       - bundle:/usr/local/bundle

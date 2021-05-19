@@ -55,7 +55,12 @@ class Lambda
   end
 
   def self.s3
-    @s3 ||= Aws::S3::Client.new(aws_config)
+    @s3 ||= begin
+      config = aws_config
+      # https://github.com/localstack/localstack/issues/472
+      config = aws_config.merge(force_path_style: true) if ENV.key?('LOCALSTACK_ENDPOINT')
+      Aws::S3::Client.new(config)
+    end
   end
 
   def self.ssm
@@ -76,7 +81,7 @@ class Lambda
   def self.aws_config
     @aws_config ||= begin
       config = { region: ENV['AWS_REGION'] }
-      config[:endpoint] = ENV['AWS_ENDPOINT'] if ENV.key?('AWS_ENDPOINT')
+      config[:endpoint] = ENV['LOCALSTACK_ENDPOINT'] if ENV.key?('LOCALSTACK_ENDPOINT')
 
       config
     end

@@ -13,6 +13,10 @@ AllCops:
 Style/Documentation:
   Enabled: false
 
+Style/AsciiComments:
+  AllowedChars:
+    - ™
+
 RSpec/FilePath:
   CustomTransform:
     CoinGecko: coingecko

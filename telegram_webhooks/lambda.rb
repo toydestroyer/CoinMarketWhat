@@ -21,6 +21,8 @@ require_relative './request_logger'
 I18n.enforce_available_locales = false
 Money.default_infinite_precision = true
 Money.locale_backend = :currency
+# Temporary™ solution to observe requests latency during development
+RestClient.log = $stdout
 
 class Lambda
   # rubocop:disable Lint/UnusedMethodArgument

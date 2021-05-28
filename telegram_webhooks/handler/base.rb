@@ -49,6 +49,29 @@ module Handler
     end
 
     def build_reply_markup(state)
+      {
+        inline_keyboard: [
+          build_data_sources_row(state),
+          build_pairs_row(state)
+        ]
+      }
+    end
+
+    def decompose_callback_data(data)
+      result = data.split(/^([\w-]+?):(\w+?)\[(\d+)\]:(\w+?)\[(\d+)\]$/).drop(1)
+
+      {
+        base: result[0],
+        source: result[1],
+        source_offset: result[2].to_i,
+        quote: result[3],
+        quote_offset: result[4].to_i
+      }
+    end
+
+    private
+
+    def build_pairs_row(state)
       data_source = Lambda.data_sources_map[state[:source]]
       avaliable_pairs = data_source.pairs(id: state[:base])
 
@@ -67,7 +90,11 @@ module Handler
 
       pairs << { text: '→', callback_data: "#{state[:base]}:#{state[:source]}[#{state[:source_offset]}]:#{state[:quote]}[#{state[:quote_offset] + 1}]" } if pagination
 
-      data_sources = DataSource::CoinGecko.available_assets[state[:base]]['tickers'].keys.map do |item|
+      pairs
+    end
+
+    def build_data_sources_row(state)
+      DataSource::CoinGecko.available_assets[state[:base]]['tickers'].keys.map do |item|
         data_source = Lambda.data_sources_map[item]
 
         if item == state[:source] # selected
@@ -79,25 +106,6 @@ module Handler
         end
         { text: text, callback_data: "#{state[:base]}:#{item}[#{state[:source_offset]}]:#{quote}" }
       end
-
-      {
-        inline_keyboard: [
-          data_sources,
-          pairs
-        ]
-      }
-    end
-
-    def decompose_callback_data(data)
-      result = data.split(/^([\w-]+?):(\w+?)\[(\d+)\]:(\w+?)\[(\d+)\]$/).drop(1)
-
-      {
-        base: result[0],
-        source: result[1],
-        source_offset: result[2].to_i,
-        quote: result[3],
-        quote_offset: result[4].to_i
-      }
     end
   end
 end

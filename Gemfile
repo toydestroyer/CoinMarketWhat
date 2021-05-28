@@ -10,6 +10,7 @@ gem 'aws-sdk-sqs'
 gem 'aws-sdk-ssm'
 gem 'money'
 gem 'rest-client'
+gem 'sentry-ruby'
 
 gem 'rubocop'
 gem 'rubocop-performance'

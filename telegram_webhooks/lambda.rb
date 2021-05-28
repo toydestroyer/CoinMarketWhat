@@ -7,6 +7,7 @@ require 'aws-sdk-s3'
 require 'aws-sdk-ssm'
 require 'rest-client'
 require 'money'
+require 'sentry-ruby'
 
 require_relative './handler/base'
 require_relative './handler/callback_query'
@@ -35,10 +36,10 @@ class Lambda
     Handler::CallbackQuery.new(body['callback_query']) if body.key?('callback_query')
 
     { statusCode: 200, body: 'ok' }
-  rescue RestClient::ExceptionWithResponse => e
-    puts e.response.to_json
+  rescue StandardError => e
+    Sentry.capture_exception(e)
 
-    raise e
+    { statusCode: 200, body: 'ok' }
   end
 
   def self.cache(event:, context:)
@@ -91,4 +92,11 @@ class Lambda
       config
     end
   end
+end
+
+Sentry.init do |config|
+  config.dsn = Lambda.ssm.get_parameter(name: '/config/sentry_dsn').parameter.value
+
+  # Send events synchronously
+  config.background_worker_threads = 0
 end

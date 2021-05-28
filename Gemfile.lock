@@ -35,6 +35,19 @@ GEM
     diff-lcs (1.4.4)
     domain_name (0.5.20190701)
       unf (>= 0.0.5, < 1.0.0)
+    faraday (1.4.2)
+      faraday-em_http (~> 1.0)
+      faraday-em_synchrony (~> 1.0)
+      faraday-excon (~> 1.1)
+      faraday-net_http (~> 1.0)
+      faraday-net_http_persistent (~> 1.1)
+      multipart-post (>= 1.2, < 3)
+      ruby2_keywords (>= 0.0.4)
+    faraday-em_http (1.0.0)
+    faraday-em_synchrony (1.0.0)
+    faraday-excon (1.1.0)
+    faraday-net_http (1.0.1)
+    faraday-net_http_persistent (1.1.0)
     hashdiff (1.0.1)
     http-accept (1.7.0)
     http-cookie (1.0.3)
@@ -47,6 +60,7 @@ GEM
     mime-types-data (3.2021.0225)
     money (6.14.1)
       i18n (>= 0.6.4, <= 2)
+    multipart-post (2.1.1)
     netrc (0.11.0)
     parallel (1.20.1)
     parser (3.0.1.1)
@@ -91,6 +105,14 @@ GEM
       rubocop (~> 1.0)
       rubocop-ast (>= 1.1.0)
     ruby-progressbar (1.11.0)
+    ruby2_keywords (0.0.4)
+    sentry-ruby (4.5.0)
+      concurrent-ruby (~> 1.0, >= 1.0.2)
+      faraday (>= 1.0)
+      sentry-ruby-core (= 4.5.0)
+    sentry-ruby-core (4.5.0)
+      concurrent-ruby
+      faraday
     unf (0.1.4)
       unf_ext
     unf_ext (0.0.7.7)
@@ -114,6 +136,7 @@ DEPENDENCIES
   rubocop
   rubocop-performance
   rubocop-rspec
+  sentry-ruby
   webmock
 
 RUBY VERSION

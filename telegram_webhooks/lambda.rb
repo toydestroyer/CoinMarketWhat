@@ -95,7 +95,8 @@ class Lambda
 end
 
 Sentry.init do |config|
-  config.dsn = Lambda.ssm.get_parameter(name: '/config/sentry_dsn').parameter.value
+  # Skip parameter lookup in development environment
+  config.dsn = Lambda.ssm.get_parameter(name: '/config/sentry_dsn').parameter.value unless ENV.key?('LOCALSTACK_ENDPOINT')
 
   # Send events synchronously
   config.background_worker_threads = 0

@@ -3,17 +3,23 @@
 module DataSource
   class Binance < Base
     class << self
-      def name
+      def display_name
         'Binance'
       end
 
-      def prices(tickers:)
-        res = RestClient.get('https://api.binance.com/api/v3/ticker/price')
+      def prices(ids:, quote: 'USDT')
+        asset = CoinGecko.available_assets[ids.first]
+        res = RestClient.get('https://api.binance.com/api/v3/ticker/price', { params: { symbol: "#{asset['symbol']}#{quote}" } })
 
-        # Because Binance API doesn't allow to get prices for multiple tickers. Either one or all.
-        all_prices = JSON.parse(res.body)
+        price = JSON.parse(res.body)['price'].to_f
 
-        all_prices.select { |price| tickers.include?(price['symbol']) }
+        [
+          {
+            'symbol' => asset['symbol'],
+            'name' => asset['name'],
+            'current_price' => price
+          }
+        ]
       end
 
       def load_assets

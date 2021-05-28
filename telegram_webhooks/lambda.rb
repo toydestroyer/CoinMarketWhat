@@ -15,8 +15,9 @@ require_relative './handler/inline_query'
 require_relative './data_source/base'
 require_relative './data_source/binance'
 require_relative './data_source/coingecko'
-require_relative './searcher'
+require_relative './cacher'
 require_relative './request_logger'
+require_relative './searcher'
 
 I18n.enforce_available_locales = false
 Money.default_infinite_precision = true
@@ -41,10 +42,8 @@ class Lambda
   end
 
   def self.cache(event:, context:)
-    raise unless event.key?('data_source') && %w[CoinGecko].include?(event['data_source'])
-
-    data_source = Object.const_get("DataSource::#{event['data_source']}")
-    data_source.cache_assets
+    cacher = Cacher.new
+    cacher.call
   end
 
   def self.logger(event:, context:)

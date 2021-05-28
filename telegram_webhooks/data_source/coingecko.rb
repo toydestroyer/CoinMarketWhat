@@ -1,10 +1,9 @@
 # frozen_string_literal: true
 
-# rubocop:disable Metrics/ClassLength
 module DataSource
   class CoinGecko < Base
     class << self
-      def name
+      def display_name
         'CoinGecko'
       end
 
@@ -64,57 +63,6 @@ module DataSource
         JSON.parse(Lambda.s3.get_object(bucket: ENV['CACHE_BUCKET'], key: "#{slug}.json").body.read)
       end
 
-      def cache_assets
-        result = []
-        page = 1
-
-        loop do
-          res = RestClient.get(
-            'https://api.coingecko.com/api/v3/coins/markets',
-            {
-              params: {
-                vs_currency: 'USD',
-                # Sorting by market cap breaks the pagination and produces duplicates with missing assets,
-                # Therefore sorting by id is more reliable
-                order: 'id_asc',
-                per_page: '250',
-                page: page
-              }
-            }
-          )
-
-          body = JSON.parse(res.body)
-
-          break if body.empty?
-
-          result += body.map do |item|
-            {
-              id: item['id'],
-              symbol: item['symbol'],
-              name: item['name'],
-              image: item['image'],
-              rank: item['market_cap_rank']
-            }
-          end
-
-          page += 1
-        end
-
-        # Nulls last
-        result = result.sort_by { |i| i[:rank] || 100_000 }
-
-        Lambda.s3.put_object(
-          key: "#{slug}.json",
-          body: result.to_json,
-          bucket: ENV['CACHE_BUCKET'],
-          storage_class: 'ONEZONE_IA',
-          metadata: {
-            count: result.size.to_s,
-            updated_at: Time.now.to_s
-          }
-        )
-      end
-
       private
 
       def fetch_cached_prices(ids:, quote:)
@@ -145,4 +93,3 @@ module DataSource
     end
   end
 end
-# rubocop:enable Metrics/ClassLength

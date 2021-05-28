@@ -7,7 +7,12 @@ module Handler
       data_source = Lambda.data_sources_map[current_state[:source]]
 
       symbol = data_source.prices(ids: [current_state[:base]], quote: current_state[:quote])[0]
-      price = Money.from_amount(symbol['current_price'], current_state[:quote]).format
+      price = begin
+        Money.from_amount(symbol['current_price'], current_state[:quote]).format
+      rescue Money::Currency::UnknownCurrency => _e
+        "#{symbol['current_price']} #{current_state[:quote]}"
+      end
+
       title = "#{symbol['name']} (#{symbol['symbol'].upcase})"
 
       RestClient.get("https://api.telegram.org/bot#{token}/editMessageText", params: {

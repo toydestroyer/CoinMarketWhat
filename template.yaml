@@ -137,7 +137,6 @@ Resources:
         UpdateCoinGeckoCacheEvent:
           Type: Schedule
           Properties:
-            Input: '{"data_source": "CoinGecko"}'
             Schedule: rate(1 day)
 
 Outputs:

@@ -65,6 +65,8 @@ class Lambda
     Sentry.with_scope do |scope|
       scope.set_user(user)
       scope.set_extras(event)
+      scope.set_extras(response_exception_extras(exception)) if exception.is_a?(RestClient::ExceptionWithResponse)
+
       scope.set_tags(
         function_name: context.function_name,
         memory_limit_in_mb: context.memory_limit_in_mb,
@@ -74,6 +76,16 @@ class Lambda
 
       Sentry.capture_exception(exception)
     end
+  end
+
+  def self.response_exception_extras(exception)
+    {
+      response: {
+        body: JSON.parse(exception.response.body),
+        code: exception.response.code,
+        headers: exception.response.headers
+      }
+    }
   end
 
   def self.dynamodb

@@ -57,7 +57,7 @@ class Lambda
     capture_exception(exception: e, event: event, context: context)
   end
 
-  def event_name(keys)
+  def self.event_name(keys)
     keys.reject { |key| key == 'update_id' }.first
   end
 

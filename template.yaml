@@ -13,8 +13,22 @@ Globals:
         CACHE_BUCKET: !Ref CacheBucket
         LOGS_BUCKET: !Ref LogsBucket
         LOGS_QUEUE: !Ref LogsQueue
+        SENTRY_DSN: !GetAtt SentryDsnParameter.Value
+        TELEGRAM_BOT_API_TOKEN: !GetAtt TelegramBotApiTokenParameter.Value
 
 Resources:
+  TelegramBotApiTokenParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: '/CoinMarketWhat/config/telegram_bot_api_token'
+      Type: String
+      Value: REPLACE-ME-IN-AWS-CONSOLE
+  SentryDsnParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: '/CoinMarketWhat/config/sentry_dsn'
+      Type: String
+      Value: REPLACE-ME-IN-AWS-CONSOLE
   DynamoDBTable:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -46,8 +60,20 @@ Resources:
       QueueName: CoinMarketWhatLogsQueue
   LogsBucket:
     Type: AWS::S3::Bucket
+    Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
   CacheBucket:
     Type: AWS::S3::Bucket
+    Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
   WebhooksApi:
     Type: AWS::Serverless::Api
     Properties:

@@ -5,7 +5,7 @@ services:
     ports:
       - 4566:4566
     environment:
-      - SERVICES=dynamodb,sqs,s3,ssm
+      - SERVICES=dynamodb,sqs,s3
   app:
     build: .
     environment:

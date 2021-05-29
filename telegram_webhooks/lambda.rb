@@ -28,7 +28,6 @@ Money.locale_backend = :currency
 RestClient.log = $stdout
 
 class Lambda
-  # rubocop:disable Lint/UnusedMethodArgument
   def self.webhook(event:, context:)
     body = JSON.parse(event['body'])
     RequestLogger.enqueue(body)
@@ -38,7 +37,9 @@ class Lambda
 
     { statusCode: 200, body: 'ok' }
   rescue StandardError => e
-    Sentry.capture_exception(e)
+    event['body'] = body
+    event_name = event_name(body.keys)
+    capture_exception(exception: e, event: event, context: context, user: body[event_name]['from'])
 
     { statusCode: 200, body: 'ok' }
   end
@@ -46,12 +47,34 @@ class Lambda
   def self.cache(event:, context:)
     cacher = Cacher.new
     cacher.call
+  rescue StandardError => e
+    capture_exception(exception: e, event: event, context: context)
   end
 
   def self.logger(event:, context:)
     RequestLogger.save(event['Records'])
+  rescue StandardError => e
+    capture_exception(exception: e, event: event, context: context)
   end
-  # rubocop:enable Lint/UnusedMethodArgument
+
+  def event_name(keys)
+    keys.reject { |key| key == 'update_id' }.first
+  end
+
+  def self.capture_exception(exception:, event:, context:, user: nil)
+    Sentry.with_scope do |scope|
+      scope.set_user(user)
+      scope.set_extras(event)
+      scope.set_tags(
+        function_name: context.function_name,
+        memory_limit_in_mb: context.memory_limit_in_mb,
+        function_version: context.function_version,
+        aws_region: ENV['AWS_REGION']
+      )
+
+      Sentry.capture_exception(exception)
+    end
+  end
 
   def self.dynamodb
     @dynamodb ||= Aws::DynamoDB::Client.new(aws_config)

@@ -1,14 +1,9 @@
-inherit_from: .rubocop_todo.yml
-
 require:
   - rubocop-rspec
   - rubocop-performance
 
 AllCops:
   NewCops: enable
-
-# Layout/LineLength:
-#   Max: 120
 
 Style/Documentation:
   Enabled: false
@@ -25,3 +20,7 @@ Metrics/BlockLength:
   IgnoredMethods:
     - describe
     - context
+
+Metrics/MethodLength:
+  CountAsOne:
+    - hash

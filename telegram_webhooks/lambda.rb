@@ -17,6 +17,7 @@ require_relative './data_source/base'
 require_relative './data_source/binance'
 require_relative './data_source/coingecko'
 require_relative './cacher'
+require_relative './event_log'
 require_relative './request_logger'
 require_relative './searcher'
 
@@ -96,7 +97,9 @@ end
 
 Sentry.init do |config|
   # Skip parameter lookup in development environment
-  config.dsn = Lambda.ssm.get_parameter(name: '/config/sentry_dsn').parameter.value unless ENV.key?('LOCALSTACK_ENDPOINT')
+  unless ENV.key?('LOCALSTACK_ENDPOINT')
+    config.dsn = Lambda.ssm.get_parameter(name: '/config/sentry_dsn').parameter.value
+  end
 
   # Send events synchronously
   config.background_worker_threads = 0

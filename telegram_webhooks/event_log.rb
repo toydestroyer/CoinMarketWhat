@@ -29,6 +29,6 @@ class EventLog
   end
 
   def time_prefix
-    time.strftime('%Y/%m/%d/%H')
+    time.strftime('year=%Y/month=%m/day=%d/hour=%H')
   end
 end

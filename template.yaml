@@ -63,6 +63,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: lambda.Lambda.webhook
+      MemorySize: 256
       Policies:
         - AWSLambdaBasicExecutionRole
         - Version: "2012-10-17"

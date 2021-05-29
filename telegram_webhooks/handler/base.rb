@@ -74,12 +74,13 @@ module Handler
     def build_pairs_row(state)
       data_source = Lambda.data_sources_map[state[:source]]
       avaliable_pairs = data_source.pairs(id: state[:base])
+      total_pairs = avaliable_pairs.size
 
       paginated, avaliable_pairs = paginate(list: avaliable_pairs, offset: state[:quote_offset])
 
       pairs = avaliable_pairs.map { |item| build_pair_button(item: item, state: state) }
 
-      pairs << pagination_button(state: state, row: 'quote') if paginated
+      pairs << pagination_button(state: state, size: total_pairs, row: 'quote') if paginated
 
       pairs
     end
@@ -115,14 +116,18 @@ module Handler
       # Due to display concerns, I want to limit the number of buttons in the row to 4
       # If available pairs more than 4 then only 3 will be displayed along with the pagination arrow
       if list.size > limit
-        list = list[offset, limit - 1]
-        return true, list
+        offset = list.size if offset > list.size
+        visible_list = list[offset, limit - 1]
+        visible_list += list[0, limit - visible_list.size - 1] if visible_list.size < limit - 1
+
+        return true, visible_list
       end
 
       [false, list]
     end
 
-    def pagination_button(state:, row:)
+    def pagination_button(state:, size:, row:)
+      state["#{row}_offset".to_sym] = 0 if state["#{row}_offset".to_sym] >= size
       state["#{row}_offset".to_sym] += 1
       source = "#{state[:source]}[#{state[:source_offset]}]"
       quote = "#{state[:quote]}[#{state[:quote_offset]}]"

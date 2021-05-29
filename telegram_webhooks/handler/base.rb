@@ -58,7 +58,7 @@ module Handler
 
       {
         type: :article,
-        id: SecureRandom.hex,
+        id: "#{symbol['id']}:coingecko:USD",
         title: title,
         description: "#{price} @ CoinGecko",
         thumb_url: symbol['image'],

@@ -6,7 +6,7 @@ module Handler
       RestClient.get("https://api.telegram.org/bot#{token}/answerInlineQuery", params: {
                        inline_query_id: query['id'],
                        results: build_inline_query_answer(query: query['query']),
-                       cache_time: 0
+                       cache_time: 60
                      })
     end
   end

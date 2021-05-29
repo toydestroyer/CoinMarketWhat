@@ -21,7 +21,7 @@ module Handler
       return [] if selected.empty?
 
       selected_ids = selected.keys
-      prices = DataSource::CoinGecko.prices(ids: selected_ids)
+      prices = DataSource::CoinGecko.prices(ids: selected_ids, quote: 'USD')
 
       result = prices.map do |symbol|
         price = Money.from_amount(symbol['current_price'], 'USD').format

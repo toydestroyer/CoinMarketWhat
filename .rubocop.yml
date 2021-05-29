@@ -12,10 +12,6 @@ Style/AsciiComments:
   AllowedChars:
     - ™
 
-RSpec/FilePath:
-  CustomTransform:
-    CoinGecko: coingecko
-
 Metrics/BlockLength:
   IgnoredMethods:
     - describe
@@ -24,3 +20,10 @@ Metrics/BlockLength:
 Metrics/MethodLength:
   CountAsOne:
     - hash
+
+RSpec/FilePath:
+  CustomTransform:
+    CoinGecko: coingecko
+
+RSpec/MultipleMemoizedHelpers:
+  Enabled: false

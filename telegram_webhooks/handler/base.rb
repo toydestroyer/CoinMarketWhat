@@ -37,24 +37,12 @@ module Handler
       }
     end
 
-    def decompose_callback_data(data)
-      result = data.split(/^([\w-]+?):(\w+?)\[(\d+)\]:(\w+?)\[(\d+)\]$/).drop(1)
-
-      {
-        base: result[0],
-        source: result[1],
-        source_offset: result[2].to_i,
-        quote: result[3],
-        quote_offset: result[4].to_i
-      }
-    end
-
     private
 
     def render_inline_query_item(symbol)
       price = Money.from_amount(symbol['current_price'], 'USD').format
       title = "#{symbol['name']} (#{symbol['symbol'].upcase})"
-      initial_state = decompose_callback_data("#{symbol['id']}:coingecko[0]:USD[0]")
+      initial_state = CallbackData.new(base: symbol['id'], source: 'coingecko', quote: 'USD')
 
       {
         type: :article,
@@ -72,44 +60,51 @@ module Handler
     end
 
     def build_pairs_row(state)
-      data_source = Lambda.data_sources_map[state[:source]]
-      avaliable_pairs = data_source.pairs(id: state[:base])
+      data_source = Lambda.data_sources_map[state.source]
+      avaliable_pairs = data_source.pairs(id: state.base)
       total_pairs = avaliable_pairs.size
 
-      paginated, avaliable_pairs = paginate(list: avaliable_pairs, offset: state[:quote_offset])
+      paginated, avaliable_pairs = paginate(list: avaliable_pairs, offset: state.quote_offset)
 
-      pairs = avaliable_pairs.map { |item| build_pair_button(item: item, state: state) }
+      pairs = avaliable_pairs.map { |item| build_pair_button(item: item, state: state.dup) }
 
-      pairs << pagination_button(state: state, size: total_pairs, row: 'quote') if paginated
+      pairs << pagination_button(state: state.dup, size: total_pairs, row: 'quote') if paginated
 
       pairs
     end
 
     def build_pair_button(item:, state:)
+      text = item == state.quote ? "• #{item} •" : item
+      state.quote = item
+
       {
-        text: item == state[:quote] ? "• #{item} •" : item,
-        callback_data: "#{state[:base]}:#{state[:source]}[#{state[:source_offset]}]:#{item}[#{state[:quote_offset]}]"
+        text: text,
+        callback_data: state.to_s
       }
     end
 
     def build_data_sources_row(state)
-      DataSource::CoinGecko.available_assets[state[:base]]['tickers'].keys.map do |item|
-        build_data_source_button(item: item, state: state)
+      DataSource::CoinGecko.available_assets[state.base]['tickers'].keys.map do |item|
+        build_data_source_button(item: item, state: state.dup)
       end
     end
 
     def build_data_source_button(item:, state:)
       data_source = Lambda.data_sources_map[item]
 
-      if item == state[:source] # selected
+      if item == state.source # selected
         text = "• #{data_source.display_name} •"
-        quote = "#{state[:quote]}[#{state[:quote_offset]}]"
       else
         text = data_source.display_name
-        quote = "#{data_source.pairs(id: state[:base])[0]}[0]"
+        state.source = data_source.slug
+        state.quote = data_source.pairs(id: state.base)[0]
+        state.quote_offset = 0
       end
 
-      { text: text, callback_data: "#{state[:base]}:#{item}[#{state[:source_offset]}]:#{quote}" }
+      {
+        text: text,
+        callback_data: state.to_s
+      }
     end
 
     def paginate(list:, offset:, limit: 4)
@@ -127,14 +122,12 @@ module Handler
     end
 
     def pagination_button(state:, size:, row:)
-      state["#{row}_offset".to_sym] = 0 if state["#{row}_offset".to_sym] >= size
-      state["#{row}_offset".to_sym] += 1
-      source = "#{state[:source]}[#{state[:source_offset]}]"
-      quote = "#{state[:quote]}[#{state[:quote_offset]}]"
+      state.send("#{row}_offset=", 0) if state.send("#{row}_offset") >= size
+      state.send("#{row}_offset=", state.send("#{row}_offset") + 1)
 
       {
         text: '→',
-        callback_data: "#{state[:base]}:#{source}:#{quote}"
+        callback_data: state.to_s
       }
     end
   end

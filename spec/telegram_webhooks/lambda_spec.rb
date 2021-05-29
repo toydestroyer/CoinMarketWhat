@@ -66,7 +66,7 @@ RSpec.describe Lambda do
     it 'saves object with correct key' do
       result
 
-      object = s3.get_object(bucket: ENV['LOGS_BUCKET'], key: 'callback_query/2021/05/18/12/1.json')
+      object = s3.get_object(bucket: ENV['LOGS_BUCKET'], key: 'callback_query/year=2021/month=05/day=18/hour=12/1.json')
       expect(object).to be_any
     end
   end

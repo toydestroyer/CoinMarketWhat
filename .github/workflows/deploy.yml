@@ -1,9 +1,7 @@
 name: SAM Validate, Build, Deploy
 on:
   workflow_run:
-    workflows:
-      - rspec
-      - rubocop
+    workflows: ["rspec"]
     types:
       - completed
 

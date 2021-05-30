@@ -4,7 +4,7 @@ module Handler
   class CallbackQuery < Base
     def handle
       current_state = CallbackData.parse(query['data'])
-      data_source = Lambda.data_sources_map[current_state.source]
+      data_source = DATA_SOURCES_MAP[current_state.source]
 
       symbol = data_source.prices(ids: [current_state.base], quote: current_state.quote)[0]
       price = render_price(amount: symbol['current_price'], quote: current_state.quote)

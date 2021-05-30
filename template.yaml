@@ -88,7 +88,7 @@ Resources:
   TelegramWebhooks:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: lambda.Lambda.webhook
+      Handler: lambda.Lambda::Webhook.call
       MemorySize: 256
       Policies:
         - AWSLambdaBasicExecutionRole
@@ -120,7 +120,7 @@ Resources:
   SaveLogsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: lambda.Lambda.logger
+      Handler: lambda.Lambda::Logger.call
       Policies:
         - AWSLambdaBasicExecutionRole
         - Version: "2012-10-17"
@@ -139,7 +139,7 @@ Resources:
   CacheFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: lambda.Lambda.cache
+      Handler: lambda.Lambda::Cache.call
       MemorySize: 256
       Timeout: 300
       Policies:

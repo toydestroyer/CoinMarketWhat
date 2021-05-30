@@ -3,6 +3,15 @@
 class EventLog
   attr_reader :body, :update_id, :event_type, :time
 
+  def self.enqueue(event)
+    puts event
+
+    Lambda.sqs.send_message(
+      queue_url: ENV['LOGS_QUEUE'],
+      message_body: event
+    )
+  end
+
   def initialize(log)
     @body = JSON.parse(log['body'])
     @update_id = @body.delete('update_id')

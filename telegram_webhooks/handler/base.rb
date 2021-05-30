@@ -60,7 +60,7 @@ module Handler
     end
 
     def build_pairs_row(state)
-      data_source = Lambda.data_sources_map[state.source]
+      data_source = DATA_SOURCES_MAP[state.source]
       avaliable_pairs = data_source.pairs(id: state.base)
       total_pairs = avaliable_pairs.size
 
@@ -90,7 +90,7 @@ module Handler
     end
 
     def build_data_source_button(item:, state:)
-      data_source = Lambda.data_sources_map[item]
+      data_source = DATA_SOURCES_MAP[item]
 
       if item == state.source # selected
         text = "• #{data_source.display_name} •"

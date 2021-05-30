@@ -6,7 +6,7 @@ module Handler
 
     def initialize(query)
       @query = query
-      @token = Lambda.token
+      @token = ENV['TELEGRAM_BOT_API_TOKEN']
 
       handle
     end

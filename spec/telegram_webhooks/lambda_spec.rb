@@ -26,7 +26,7 @@ RSpec.describe Lambda do
       it 'sends log to queue' do
         result
 
-        expect(RequestLogger).to have_received(:enqueue).with('random' => 'param')
+        expect(RequestLogger).to have_received(:enqueue).with({ random: 'param' }.to_json)
       end
     end
 

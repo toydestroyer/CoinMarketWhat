@@ -2,11 +2,11 @@
 
 class RequestLogger
   def self.enqueue(event)
-    puts event.to_json
+    puts event
 
     Lambda.sqs.send_message(
       queue_url: ENV['LOGS_QUEUE'],
-      message_body: event.to_json
+      message_body: event
     )
   end
 

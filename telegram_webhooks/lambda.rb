@@ -4,7 +4,6 @@ require 'json'
 require 'aws-sdk-dynamodb'
 require 'aws-sdk-sqs'
 require 'aws-sdk-s3'
-require 'aws-sdk-ssm'
 require 'rest-client'
 require 'money'
 require 'sentry-ruby'
@@ -22,6 +21,11 @@ require_relative './event_log'
 require_relative './request_logger'
 require_relative './searcher'
 
+Sentry.init do |config|
+  # Send events synchronously
+  config.background_worker_threads = 0
+end
+
 I18n.enforce_available_locales = false
 Money.default_infinite_precision = true
 Money.locale_backend = :currency
@@ -31,10 +35,11 @@ RestClient.log = $stdout
 class Lambda
   def self.webhook(event:, context:)
     body = JSON.parse(event['body'])
-    RequestLogger.enqueue(body)
 
     Handler::InlineQuery.new(body['inline_query']) if body.key?('inline_query')
     Handler::CallbackQuery.new(body['callback_query']) if body.key?('callback_query')
+
+    RequestLogger.enqueue(event['body'])
 
     { statusCode: 200, body: 'ok' }
   rescue StandardError => e
@@ -106,14 +111,6 @@ class Lambda
     end
   end
 
-  def self.ssm
-    @ssm ||= Aws::SSM::Client.new(aws_config)
-  end
-
-  def self.token
-    @token ||= ssm.get_parameter(name: '/bots/telegram/CoinMarketWhat').parameter.value
-  end
-
   def self.data_sources_map
     {
       'coingecko' => DataSource::CoinGecko,
@@ -129,14 +126,4 @@ class Lambda
       config
     end
   end
-end
-
-Sentry.init do |config|
-  # Skip parameter lookup in development environment
-  unless ENV.key?('LOCALSTACK_ENDPOINT')
-    config.dsn = Lambda.ssm.get_parameter(name: '/config/sentry_dsn').parameter.value
-  end
-
-  # Send events synchronously
-  config.background_worker_threads = 0
 end

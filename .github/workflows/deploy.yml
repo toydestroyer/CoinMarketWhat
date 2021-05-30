@@ -1,11 +1,14 @@
 name: SAM Validate, Build, Deploy
-on: push
+on:
+  workflow_run:
+    workflows:
+      - rspec
+      - rubocop
+    types:
+      - completed
 
 jobs:
   sam-validate-build-deploy:
-    needs:
-      - test
-      - rubocop
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

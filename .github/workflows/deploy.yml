@@ -1,8 +1,7 @@
 name: SAM Validate, Build, Deploy
 on:
-  workflow_run:
-    workflows: ["rspec"]
-    types: [completed]
+  push:
+    branches: [master]
 
 jobs:
   sam-validate-build-deploy:

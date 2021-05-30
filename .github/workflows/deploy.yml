@@ -3,6 +3,9 @@ on: push
 
 jobs:
   sam-validate-build-deploy:
+    needs:
+      - test
+      - rubocop
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

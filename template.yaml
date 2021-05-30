@@ -110,10 +110,6 @@ Resources:
               Resource: !Sub
                 - ${BucketArn}/*
                 - { BucketArn: !GetAtt CacheBucket.Arn }
-            - Effect: Allow
-              Action:
-                - 'ssm:GetParameter*'
-              Resource: !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/*'
       Events:
         Webhooks:
           Type: Api
@@ -135,10 +131,6 @@ Resources:
               Resource: !Sub
                 - ${BucketArn}/*
                 - { BucketArn: !GetAtt LogsBucket.Arn }
-            - Effect: Allow
-              Action:
-                - 'ssm:GetParameter*'
-              Resource: !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/*'
       Events:
         SQSLogsEvent:
           Type: SQS
@@ -160,10 +152,6 @@ Resources:
               Resource: !Sub
                 - ${BucketArn}/*
                 - { BucketArn: !GetAtt CacheBucket.Arn }
-            - Effect: Allow
-              Action:
-                - 'ssm:GetParameter*'
-              Resource: !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/*'
       Events:
         UpdateCoinGeckoCacheEvent:
           Type: Schedule

@@ -12,13 +12,17 @@ require_relative './handler/base'
 require_relative './handler/callback_query'
 require_relative './handler/inline_query'
 
+require_relative './lambda/base'
+require_relative './lambda/cache'
+require_relative './lambda/logger'
+require_relative './lambda/webhook'
+
 require_relative './data_source/base'
 require_relative './data_source/binance'
 require_relative './data_source/coingecko'
 require_relative './cacher'
 require_relative './callback_data'
 require_relative './event_log'
-require_relative './request_logger'
 require_relative './searcher'
 
 Sentry.init do |config|
@@ -32,68 +36,12 @@ Money.locale_backend = :currency
 # Temporary™ solution to observe requests latency during development
 RestClient.log = $stdout
 
-class Lambda
-  def self.webhook(event:, context:)
-    body = JSON.parse(event['body'])
+DATA_SOURCES_MAP = {
+  'coingecko' => DataSource::CoinGecko,
+  'binance' => DataSource::Binance
+}.freeze
 
-    Handler::InlineQuery.new(body['inline_query']) if body.key?('inline_query')
-    Handler::CallbackQuery.new(body['callback_query']) if body.key?('callback_query')
-
-    RequestLogger.enqueue(event['body'])
-
-    { statusCode: 200, body: 'ok' }
-  rescue StandardError => e
-    event['body'] = body
-    event_name = event_name(body.keys)
-    capture_exception(exception: e, event: event, context: context, user: body[event_name]['from'])
-
-    { statusCode: 200, body: 'ok' }
-  end
-
-  def self.cache(event:, context:)
-    cacher = Cacher.new
-    cacher.call
-  rescue StandardError => e
-    capture_exception(exception: e, event: event, context: context)
-  end
-
-  def self.logger(event:, context:)
-    RequestLogger.save(event['Records'])
-  rescue StandardError => e
-    capture_exception(exception: e, event: event, context: context)
-  end
-
-  def self.event_name(keys)
-    keys.reject { |key| key == 'update_id' }.first
-  end
-
-  def self.capture_exception(exception:, event:, context:, user: nil)
-    Sentry.with_scope do |scope|
-      scope.set_user(user)
-      scope.set_extras(event)
-      scope.set_extras(response_exception_extras(exception)) if exception.is_a?(RestClient::ExceptionWithResponse)
-
-      scope.set_tags(
-        function_name: context.function_name,
-        memory_limit_in_mb: context.memory_limit_in_mb,
-        function_version: context.function_version,
-        aws_region: ENV['AWS_REGION']
-      )
-
-      Sentry.capture_exception(exception)
-    end
-  end
-
-  def self.response_exception_extras(exception)
-    {
-      response: {
-        body: JSON.parse(exception.response.body),
-        code: exception.response.code,
-        headers: exception.response.headers
-      }
-    }
-  end
-
+module Lambda
   def self.dynamodb
     @dynamodb ||= Aws::DynamoDB::Client.new(aws_config)
   end
@@ -109,13 +57,6 @@ class Lambda
       config = aws_config.merge(force_path_style: true) if ENV.key?('LOCALSTACK_ENDPOINT')
       Aws::S3::Client.new(config)
     end
-  end
-
-  def self.data_sources_map
-    {
-      'coingecko' => DataSource::CoinGecko,
-      'binance' => DataSource::Binance
-    }
   end
 
   def self.aws_config

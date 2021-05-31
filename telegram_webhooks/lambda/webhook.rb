@@ -2,6 +2,8 @@
 
 module Lambda
   class Webhook < Base
+    @trigger = :api_gateway
+
     HANDLERS_MAP = {
       'inline_query' => Handler::InlineQuery,
       'callback_query' => Handler::CallbackQuery
@@ -9,16 +11,21 @@ module Lambda
 
     attr_reader :body
 
-    def initialize(event:, context:)
+    def initialize(event:)
       super
 
       @body = JSON.parse(event['body'])
+      EventLog.enqueue(event['body'])
     end
 
     def process
-      HANDLERS_MAP[event_name].new(body[event_name]) if HANDLERS_MAP.key?(event_name)
-    ensure
-      EventLog.enqueue(event['body'])
+      return { statusCode: 200, body: '' } unless HANDLERS_MAP.key?(event_name)
+
+      # call .respond to render command back to telegram immidiately
+      # or .process to send the command with a separate HTTP request
+      result = HANDLERS_MAP[event_name].new(body[event_name]).respond
+
+      { statusCode: 200, body: result.to_json }
     end
 
     def event_name
@@ -31,10 +38,6 @@ module Lambda
 
     def sentry_extras
       { user: current_user }
-    end
-
-    def self.render
-      { statusCode: 200, body: 'ok' }
     end
   end
 end

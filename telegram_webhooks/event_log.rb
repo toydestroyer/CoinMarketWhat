@@ -1,16 +1,18 @@
 # frozen_string_literal: true
 
 class EventLog
-  attr_reader :body, :update_id, :event_type, :time
+  class << self
+    def enqueue(event)
+      puts event
 
-  def self.enqueue(event)
-    puts event
-
-    Lambda.sqs.send_message(
-      queue_url: ENV['LOGS_QUEUE'],
-      message_body: event
-    )
+      Lambda.sqs.send_message(
+        queue_url: ENV['LOGS_QUEUE'],
+        message_body: event
+      )
+    end
   end
+
+  attr_reader :body, :update_id, :event_type, :time
 
   def initialize(log)
     @body = JSON.parse(log['body'])

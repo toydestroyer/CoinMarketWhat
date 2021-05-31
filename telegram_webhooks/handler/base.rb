@@ -7,55 +7,38 @@ module Handler
     def initialize(query)
       @query = query
       @token = ENV['TELEGRAM_BOT_API_TOKEN']
-
-      handle
     end
 
-    def handle
+    def process
+      RestClient.get("https://api.telegram.org/bot#{token}/#{method_name}", params: params)
+    end
+
+    def respond
+      params.merge(method: method_name)
+    end
+
+    def method_name
       raise 'not implemented'
     end
 
-    def build_inline_query_answer(query:)
-      selected = Searcher.call(query: query)
-
-      return [] if selected.empty?
-
-      selected_ids = selected.keys
-      prices = DataSource::CoinGecko.prices(ids: selected_ids, quote: 'USD')
-
-      result = prices.map { |symbol| render_inline_query_item(symbol) }
-
-      result.to_json
+    def params
+      {}
     end
+
+    private
 
     def build_reply_markup(state)
       {
         inline_keyboard: [
           build_data_sources_row(state),
-          build_pairs_row(state)
+          build_pairs_row(state),
+          [
+            {
+              text: 'Try it out',
+              switch_inline_query_current_chat: ''
+            }
+          ]
         ]
-      }
-    end
-
-    private
-
-    def render_inline_query_item(symbol)
-      price = Money.from_amount(symbol['current_price'], 'USD').format
-      title = "#{symbol['name']} (#{symbol['symbol'].upcase})"
-      initial_state = CallbackData.new(base: symbol['id'], source: 'coingecko', quote: 'USD')
-
-      {
-        type: :article,
-        id: "#{symbol['id']}:coingecko:USD",
-        title: title,
-        description: "#{price} @ CoinGecko",
-        thumb_url: symbol['image'],
-        thumb_width: 250,
-        thumb_height: 250,
-        input_message_content: {
-          message_text: "#{title} — #{price}"
-        },
-        reply_markup: build_reply_markup(initial_state)
       }
     end
 

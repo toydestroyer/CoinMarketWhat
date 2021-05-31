@@ -6,7 +6,8 @@ module Lambda
 
     HANDLERS_MAP = {
       'inline_query' => Handler::InlineQuery,
-      'callback_query' => Handler::CallbackQuery
+      'callback_query' => Handler::CallbackQuery,
+      'message' => Handler::Message
     }.freeze
 
     attr_reader :body
@@ -28,16 +29,18 @@ module Lambda
       { statusCode: 200, body: result.to_json }
     end
 
+    def sentry_extras
+      { user: current_user }
+    end
+
+    private
+
     def event_name
       @event_name ||= body.keys.reject { |key| key == 'update_id' }.first
     end
 
     def current_user
       @current_user ||= body[event_name]['from']
-    end
-
-    def sentry_extras
-      { user: current_user }
     end
   end
 end

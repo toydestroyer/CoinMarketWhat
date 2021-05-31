@@ -15,12 +15,19 @@ Globals:
         LOGS_QUEUE: !Ref LogsQueue
         SENTRY_DSN: !GetAtt SentryDsnParameter.Value
         TELEGRAM_BOT_API_TOKEN: !GetAtt TelegramBotApiTokenParameter.Value
+        TELEGRAM_ADMIN_CHAT_ID: !GetAtt TelegramAdminChatIdParameter.Value
 
 Resources:
   TelegramBotApiTokenParameter:
     Type: AWS::SSM::Parameter
     Properties:
       Name: '/CoinMarketWhat/config/telegram_bot_api_token'
+      Type: String
+      Value: REPLACE-ME-IN-AWS-CONSOLE
+  TelegramAdminChatIdParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: '/CoinMarketWhat/config/telegram_admin_chat_id'
       Type: String
       Value: REPLACE-ME-IN-AWS-CONSOLE
   SentryDsnParameter:

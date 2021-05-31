@@ -10,6 +10,9 @@ module Handler
       {
         inline_query_id: query['id'],
         results: build_inline_query_answer(query: query['query']),
+        # is_personal: true,
+        # switch_pm_parameter: '0',
+        # switch_pm_text: 'How it works?',
         cache_time: 0
       }
     end

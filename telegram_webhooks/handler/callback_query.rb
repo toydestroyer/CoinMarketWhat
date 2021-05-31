@@ -2,33 +2,44 @@
 
 module Handler
   class CallbackQuery < Base
-    def handle
-      current_state = CallbackData.parse(query['data'])
-      data_source = DATA_SOURCES_MAP[current_state.source]
+    attr_reader :state, :price
 
-      symbol = data_source.prices(ids: [current_state.base], quote: current_state.quote)[0]
-      price = render_price(amount: symbol['current_price'], quote: current_state.quote)
+    def initialize(query)
+      super
 
-      edit_message(symbol: symbol, price: price, state: current_state)
+      @state = CallbackData.parse(query['data'])
+      @price = render_price(amount: symbol['current_price'], quote: state.quote)
+    end
+
+    def method_name
+      'editMessageText'
+    end
+
+    def params
+      {
+        text: "#{title} — #{price}",
+        inline_message_id: query['inline_message_id'],
+        reply_markup: build_reply_markup(state).to_json
+      }
+    end
+
+    private
+
+    def symbol
+      @symbol ||= begin
+        data_source = DATA_SOURCES_MAP[state.source]
+        data_source.prices(ids: [state.base], quote: state.quote)[0]
+      end
+    end
+
+    def title
+      "#{symbol['name']} (#{symbol['symbol'].upcase})"
     end
 
     def render_price(amount:, quote:)
       Money.from_amount(amount, quote).format
     rescue Money::Currency::UnknownCurrency => _e
       "#{amount} #{quote}"
-    end
-
-    def edit_message(symbol:, price:, state:)
-      title = "#{symbol['name']} (#{symbol['symbol'].upcase})"
-
-      RestClient.get(
-        "https://api.telegram.org/bot#{token}/editMessageText",
-        params: {
-          text: "#{title} — #{price}",
-          inline_message_id: query['inline_message_id'],
-          reply_markup: build_reply_markup(state).to_json
-        }
-      )
     end
   end
 end

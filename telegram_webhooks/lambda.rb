@@ -20,9 +20,11 @@ require_relative './lambda/webhook'
 require_relative './data_source/base'
 require_relative './data_source/binance'
 require_relative './data_source/coingecko'
+
 require_relative './cacher'
 require_relative './callback_data'
 require_relative './event_log'
+require_relative './exception_handler'
 require_relative './searcher'
 
 Sentry.init do |config|
@@ -42,29 +44,31 @@ DATA_SOURCES_MAP = {
 }.freeze
 
 module Lambda
-  def self.dynamodb
-    @dynamodb ||= Aws::DynamoDB::Client.new(aws_config)
-  end
-
-  def self.sqs
-    @sqs ||= Aws::SQS::Client.new(aws_config)
-  end
-
-  def self.s3
-    @s3 ||= begin
-      config = aws_config
-      # https://github.com/localstack/localstack/issues/472
-      config = aws_config.merge(force_path_style: true) if ENV.key?('LOCALSTACK_ENDPOINT')
-      Aws::S3::Client.new(config)
+  class << self
+    def dynamodb
+      @dynamodb ||= Aws::DynamoDB::Client.new(aws_config)
     end
-  end
 
-  def self.aws_config
-    @aws_config ||= begin
-      config = { region: ENV['AWS_REGION'] }
-      config[:endpoint] = ENV['LOCALSTACK_ENDPOINT'] if ENV.key?('LOCALSTACK_ENDPOINT')
+    def sqs
+      @sqs ||= Aws::SQS::Client.new(aws_config)
+    end
 
-      config
+    def s3
+      @s3 ||= begin
+        config = aws_config
+        # https://github.com/localstack/localstack/issues/472
+        config = aws_config.merge(force_path_style: true) if ENV.key?('LOCALSTACK_ENDPOINT')
+        Aws::S3::Client.new(config)
+      end
+    end
+
+    def aws_config
+      @aws_config ||= begin
+        config = { region: ENV['AWS_REGION'] }
+        config[:endpoint] = ENV['LOCALSTACK_ENDPOINT'] if ENV.key?('LOCALSTACK_ENDPOINT')
+
+        config
+      end
     end
   end
 end

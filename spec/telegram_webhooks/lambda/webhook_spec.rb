@@ -11,7 +11,7 @@ RSpec.describe Lambda::Webhook, :with_lambda do
   context 'with any event' do
     let(:body) { { random: 'param' } }
 
-    it { is_expected.to include(statusCode: 200, body: 'ok') }
+    it { is_expected.to include(statusCode: 200, body: '') }
 
     it 'not raise an error' do
       expect { result }.not_to raise_error

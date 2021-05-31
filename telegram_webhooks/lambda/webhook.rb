@@ -21,7 +21,7 @@ module Lambda
     def process
       return { statusCode: 200, body: '' } unless HANDLERS_MAP.key?(event_name)
 
-      # call .respond to render command back to telegram immidiately
+      # call .respond to render command back to telegram immediately
       # or .process to send the command with a separate HTTP request
       result = HANDLERS_MAP[event_name].new(body[event_name]).respond
 

@@ -2,21 +2,36 @@
 
 module Handler
   class InlineQuery < Base
+    attr_reader :chat_type, :id
+
+    def initialize(query)
+      super
+
+      @chat_type = query['chat_type']
+      @id = query['id']
+      @query = query['query']
+    end
+
     def method_name
       'answerInlineQuery'
     end
 
     def params
-      {
-        inline_query_id: query['id'],
-        results: build_inline_query_answer(query: query['query']),
-        cache_time: 0
+      result = {
+        inline_query_id: id,
+        results: build_inline_query_answer,
+        is_personal: true,
+        cache_time: 60
       }
+
+      return result if %w[private sender].include?(chat_type) || user.registered?
+
+      result.merge(switch_pm_parameter: '0', switch_pm_text: 'How it works?')
     end
 
     private
 
-    def build_inline_query_answer(query:)
+    def build_inline_query_answer
       selected = Searcher.call(query: query)
 
       return [] if selected.empty?
@@ -45,7 +60,7 @@ module Handler
         input_message_content: {
           message_text: "#{title} — #{price}"
         },
-        reply_markup: build_reply_markup(initial_state)
+        reply_markup: build_reply_markup(state: initial_state, try_button: !%w[private sender].include?(chat_type))
       }
     end
   end

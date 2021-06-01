@@ -8,9 +8,19 @@ require 'rest-client'
 require 'money'
 require 'sentry-ruby'
 
+require_relative './command/base'
+require_relative './command/donate'
+require_relative './command/how_to'
+require_relative './command/not_found'
+require_relative './command/start'
+require_relative './command/finder'
+
 require_relative './handler/base'
 require_relative './handler/callback_query'
 require_relative './handler/inline_query'
+require_relative './handler/message'
+
+require_relative './telegram/user'
 
 require_relative './lambda/base'
 require_relative './lambda/cache'

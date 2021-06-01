@@ -3,6 +3,8 @@
 module DataSource
   class Base
     class << self
+      USD_ALL = %w[USD USDT USDC BUSD TUSD].freeze
+
       def display_name
         raise 'not implemented'
       end
@@ -17,6 +19,15 @@ module DataSource
 
       def pairs(id:)
         CoinGecko.available_assets[id]['tickers'][slug]['quotes']
+      end
+
+      def pair_offset(id:, quote:)
+        pairs(id: id).index(quote) || 0
+      end
+
+      def matching_pair(id:, matching:)
+        result = pairs(id: id)
+        result.detect { |e| e == matching || (USD_ALL.include?(e) && USD_ALL.include?(matching)) } || result[0]
       end
 
       def prices(ids:, quote:)
@@ -60,6 +71,8 @@ module DataSource
       end
 
       def render_cached_prices(prices)
+        prices = prices.sort_by { |e| prioritized_ids.index(e['id']) || Float::INFINITY }
+
         prices.map do |price|
           {
             'current_price' => price['price'].to_f,
@@ -69,6 +82,10 @@ module DataSource
             'image' => price['image']
           }
         end
+      end
+
+      def prioritized_ids
+        @prioritized_ids ||= CoinGecko.available_assets.select { |_k, v| v['rank'] }.keys
       end
 
       def price_id(id:, quote:)

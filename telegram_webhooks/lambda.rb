@@ -45,6 +45,17 @@ end
 I18n.enforce_available_locales = false
 Money.default_infinite_precision = true
 Money.locale_backend = :currency
+
+# Stop Money from formatting BTC and BCH
+Money::Currency.unregister(:btc)
+Money::Currency.unregister(:bch)
+
+# Registed USD-attached stablecoins to render as USD
+Money::Currency.inherit(:usd, iso_code: 'USDT', priority: 100)
+Money::Currency.inherit(:usd, iso_code: 'USDC', priority: 100)
+Money::Currency.inherit(:usd, iso_code: 'BUSD', priority: 100)
+Money::Currency.inherit(:usd, iso_code: 'TUSD', priority: 100)
+
 # Temporary™ solution to observe requests latency during development
 RestClient.log = $stdout
 

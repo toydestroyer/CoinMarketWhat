@@ -79,8 +79,8 @@ module Handler
       else
         text = data_source.display_name
         state.source = data_source.slug
-        state.quote = data_source.pairs(id: state.base)[0]
-        state.quote_offset = 0
+        state.quote = data_source.matching_pair(id: state.base, matching: state.quote)
+        state.quote_offset = data_source.pair_offset(id: state.base, quote: state.quote)
       end
 
       {

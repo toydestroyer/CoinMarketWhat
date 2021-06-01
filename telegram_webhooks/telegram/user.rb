@@ -18,12 +18,10 @@ module Telegram
     def register
       return if registered?
 
-      result = Lambda.dynamodb.put_item(
+      Lambda.dynamodb.put_item(
         table_name: 'CoinMarketWhatDB',
         item: params.merge(resource_type: 'TelegramUser', resource_id: id.to_s, created_at: Time.now.to_i)
       )
-
-      puts result
     end
 
     def registered?
@@ -32,8 +30,6 @@ module Telegram
           table_name: 'CoinMarketWhatDB',
           key: { resource_type: 'TelegramUser', resource_id: id.to_s }
         )
-
-        puts result
 
         result.item
       end

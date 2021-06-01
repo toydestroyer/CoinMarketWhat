@@ -26,6 +26,34 @@ module DataSource
         JSON.parse(res.body)
       end
 
+      def fetch_batch_prices(id:, quotes:)
+        asset = available_assets[id]
+
+        res = RestClient.get('https://api.coingecko.com/api/v3/simple/price', { params: { ids: id, vs_currencies: quotes.join(',') } })
+        result = JSON.parse(res)[id]
+
+        items = result.map do |quote, price|
+          {
+            put_request: {
+              item: {
+                resource_id: [id, slug, quote.upcase].join(':'),
+                resource_type: 'price',
+                price: price,
+                name: asset['name'],
+                symbol: asset['symbol'],
+                id: asset['id'],
+                image: asset['image'],
+                valid_to: Time.now.to_i + 60
+              }
+            }
+          }
+        end
+
+        Lambda.dynamodb.batch_write_item(
+          request_items: { 'CoinMarketWhatDB' => items }
+        )
+      end
+
       def load_assets
         JSON.parse(Lambda.s3.get_object(bucket: ENV['CACHE_BUCKET'], key: "#{slug}.json").body.read)
       end

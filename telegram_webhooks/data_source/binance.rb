@@ -33,6 +33,37 @@ module DataSource
         ]
       end
 
+      def fetch_batch_prices(id:, quotes:)
+        asset = CoinGecko.available_assets[id]
+        symbol = asset['symbol']
+        symbols = quotes.map { |quote| "#{symbol}#{quote}" }
+
+        res = RestClient.get('https://api.binance.com/api/v3/ticker/price')
+        result = JSON.parse(res)
+        result = result.select { |item| symbols.include?(item['symbol']) }
+
+        items = result.map do |item|
+          {
+            put_request: {
+              item: {
+                resource_id: [id, slug, item['symbol'][symbol.size...]].join(':'),
+                resource_type: 'price',
+                price: item['price'].to_f,
+                name: asset['name'],
+                symbol: asset['symbol'],
+                id: asset['id'],
+                image: asset['image'],
+                valid_to: Time.now.to_i + 60
+              }
+            }
+          }
+        end
+
+        Lambda.dynamodb.batch_write_item(
+          request_items: { 'CoinMarketWhatDB' => items }
+        )
+      end
+
       def load_assets
         res = RestClient.get('https://api.binance.com/api/v3/exchangeInfo')
         symbols = JSON.parse(res.body)['symbols']

@@ -14,6 +14,7 @@ Globals:
         LOGS_BUCKET: !Ref LogsBucket
         LOGS_QUEUE: !Ref LogsQueue
         CALLBACK_QUERIES_QUEUE: !Ref CallbackQueriesQueue
+        PRE_CACHE_QUEUE: !Ref PreCacheQueue
         SENTRY_DSN: !GetAtt SentryDsnParameter.Value
         TELEGRAM_BOT_API_TOKEN: !GetAtt TelegramBotApiTokenParameter.Value
         TELEGRAM_ADMIN_CHAT_ID: !GetAtt TelegramAdminChatIdParameter.Value
@@ -77,6 +78,10 @@ Resources:
     Type: AWS::SQS::Queue
     Properties:
       QueueName: CoinMarketWhatCallbackQueriesQueue
+  PreCacheQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: CoinMarketWhatPreCacheQueue
   LogsBucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -124,6 +129,7 @@ Resources:
               Resource:
                 - !GetAtt LogsQueue.Arn
                 - !GetAtt CallbackQueriesQueue.Arn
+                - !GetAtt PreCacheQueue.Arn
             - Effect: Allow
               Action:
                 - s3:GetObject
@@ -156,6 +162,31 @@ Resources:
           Type: SQS
           Properties:
             Queue: !GetAtt LogsQueue.Arn
+  PreCacheFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: lambda.Lambda::PreCacher.call
+      Timeout: 10
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:*
+              Resource:
+                - !GetAtt DynamoDBTable.Arn
+            - Effect: Allow
+              Action:
+                - s3:GetObject
+              Resource: !Sub
+                - ${BucketArn}/*
+                - { BucketArn: !GetAtt CacheBucket.Arn }
+      Events:
+        SQSLogsEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt PreCacheQueue.Arn
   CacheFunction:
     Type: AWS::Serverless::Function
     Properties:

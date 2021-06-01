@@ -12,7 +12,9 @@ module Lambda
         ExceptionHandler.call(e, event: event, **handler&.sentry_extras)
 
         # Log exception to Sentry and swallow it, because I don't want Telegram to resend the event
-        { statusCode: 200, body: '' } if trigger == :api_gateway
+        return { statusCode: 200, body: '' } if trigger == :api_gateway
+
+        raise e
       end
     end
 

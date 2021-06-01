@@ -26,6 +26,7 @@ require_relative './lambda/base'
 require_relative './lambda/answer_callback_query'
 require_relative './lambda/cache'
 require_relative './lambda/logger'
+require_relative './lambda/pre_cacher'
 require_relative './lambda/webhook'
 
 require_relative './data_source/base'

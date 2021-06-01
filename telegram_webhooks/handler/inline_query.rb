@@ -21,7 +21,7 @@ module Handler
         inline_query_id: id,
         results: build_inline_query_answer,
         is_personal: true,
-        cache_time: 60
+        cache_time: 0
       }
 
       return result if %w[private sender].include?(chat_type) || user.registered?

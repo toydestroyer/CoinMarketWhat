@@ -10,8 +10,8 @@ module DataSource
       # For CoinGecko id is not in use because list of pairs is static
       # Full list of supported pairs here https://api.coingecko.com/api/v3/simple/supported_vs_currencies
       # rubocop:disable Lint/UnusedMethodArgument
-      def pairs(id:)
-        %w[USD EUR CNY JPY KRW]
+      def pairs(id:, matching: nil)
+        vs_currencies
       end
       # rubocop:enable Lint/UnusedMethodArgument
 
@@ -28,6 +28,17 @@ module DataSource
 
       def load_assets
         JSON.parse(Lambda.s3.get_object(bucket: ENV['CACHE_BUCKET'], key: "#{slug}.json").body.read)
+      end
+
+      def vs_currencies
+        @vs_currencies ||= begin
+          res = RestClient.get('https://api.coingecko.com/api/v3/simple/supported_vs_currencies')
+          result = JSON.parse(res.body)
+          money_by_priority = Money::Currency.map { |e| e.id.to_s }
+          result = result.sort_by { |e| money_by_priority.index(e) || Float::INFINITY }
+
+          result.map(&:upcase)
+        end
       end
     end
   end

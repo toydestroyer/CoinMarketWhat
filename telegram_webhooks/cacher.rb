@@ -85,8 +85,7 @@ class Cacher
   end
 
   def sort_assets
-    # Nulls last
-    @result = result.sort_by { |_k, v| v[:rank] || 100_000 }.to_h
+    @result = result.sort_by { |_k, v| v[:rank] || Float::INFINITY }.to_h
   end
 
   def save_to_s3

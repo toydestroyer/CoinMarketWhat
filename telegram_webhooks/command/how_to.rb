@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 module Command
-  class Help < Base
+  class HowTo < Base
     def message
       {
-        text: 'Help'
+        text: 'How To'
       }
     end
   end

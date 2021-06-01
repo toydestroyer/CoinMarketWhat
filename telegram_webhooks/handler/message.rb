@@ -2,13 +2,12 @@
 
 module Handler
   class Message < Base
-    attr_reader :id, :from, :chat, :text, :entities, :admin_chat_id
+    attr_reader :id, :chat, :text, :entities, :admin_chat_id
 
     def initialize(query)
       super
 
       @id = query['message_id']
-      @from = query['from']
       @chat = query['chat']
       @text = query['text']
       @entities = query['entities']
@@ -43,7 +42,7 @@ module Handler
     def process_commands
       bot_commands.each do |bot_command|
         command_class = Command::Finder.by_command(bot_command)
-        command = command_class.new(command: bot_command, from: from, chat: chat)
+        command = command_class.new(command: bot_command, user: user, chat: chat)
         command.process
       end
     end

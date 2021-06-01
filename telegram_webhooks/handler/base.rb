@@ -2,10 +2,11 @@
 
 module Handler
   class Base
-    attr_reader :query, :token
+    attr_reader :query, :token, :user
 
     def initialize(query)
       @query = query
+      @user = Telegram::User.new(query['from'])
       @token = ENV['TELEGRAM_BOT_API_TOKEN']
     end
 
@@ -27,19 +28,17 @@ module Handler
 
     private
 
-    def build_reply_markup(state)
-      {
+    def build_reply_markup(state:, try_button: false)
+      result = {
         inline_keyboard: [
           build_data_sources_row(state),
-          build_pairs_row(state),
-          [
-            {
-              text: 'Try it out',
-              switch_inline_query_current_chat: ''
-            }
-          ]
+          build_pairs_row(state)
         ]
       }
+
+      result[:inline_keyboard] << [{ text: 'Try it out', switch_inline_query_current_chat: '' }] if try_button
+
+      result
     end
 
     def build_pairs_row(state)

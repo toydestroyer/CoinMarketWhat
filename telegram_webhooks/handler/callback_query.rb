@@ -2,11 +2,12 @@
 
 module Handler
   class CallbackQuery < Base
-    attr_reader :state, :price
+    attr_reader :chat_instance, :state, :price
 
     def initialize(query)
       super
 
+      @chat_instance = BigDecimal(query['chat_instance'])
       @state = CallbackData.parse(query['data'])
       @price = render_price(amount: symbol['current_price'], quote: state.quote)
     end
@@ -19,7 +20,7 @@ module Handler
       {
         text: "#{title} — #{price}",
         inline_message_id: query['inline_message_id'],
-        reply_markup: build_reply_markup(state).to_json
+        reply_markup: build_reply_markup(state: state, try_button: chat_instance.negative?).to_json
       }
     end
 

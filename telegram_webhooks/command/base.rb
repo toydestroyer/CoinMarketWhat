@@ -2,11 +2,11 @@
 
 module Command
   class Base
-    attr_reader :command, :from, :chat, :token
+    attr_reader :command, :user, :chat, :token
 
-    def initialize(command:, from:, chat:)
+    def initialize(command:, user:, chat:)
       @command = command
-      @from = from
+      @user = user
       @chat = chat
       @token = ENV['TELEGRAM_BOT_API_TOKEN']
     end

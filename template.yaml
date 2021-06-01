@@ -16,6 +16,7 @@ Globals:
         SENTRY_DSN: !GetAtt SentryDsnParameter.Value
         TELEGRAM_BOT_API_TOKEN: !GetAtt TelegramBotApiTokenParameter.Value
         TELEGRAM_ADMIN_CHAT_ID: !GetAtt TelegramAdminChatIdParameter.Value
+        DONATION_ADDRESS: !GetAtt DonationAddressParameter.Value
 
 Resources:
   TelegramBotApiTokenParameter:
@@ -36,6 +37,12 @@ Resources:
       Name: '/CoinMarketWhat/config/sentry_dsn'
       Type: String
       Value: REPLACE-ME-IN-AWS-CONSOLE
+  DonationAddressParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: '/CoinMarketWhat/config/donation_address'
+      Type: String
+      Value: '{"coin": "address"}'
   DynamoDBTable:
     Type: AWS::DynamoDB::Table
     Properties:

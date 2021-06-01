@@ -6,7 +6,8 @@ module Command
       COMMANDS_MAP = {
         '/start' => Command::Start,
         '/about' => Command::Start,
-        '/help' => Command::Help,
+        '/help' => Command::HowTo,
+        '/howto' => Command::HowTo,
         '/donate' => Command::Donate
       }.freeze
 

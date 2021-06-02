@@ -13,6 +13,7 @@ Globals:
         CACHE_BUCKET: !Ref CacheBucket
         LOGS_BUCKET: !Ref LogsBucket
         LOGS_QUEUE: !Ref LogsQueue
+        CALLBACK_QUERIES_QUEUE: !Ref CallbackQueriesQueue
         SENTRY_DSN: !GetAtt SentryDsnParameter.Value
         TELEGRAM_BOT_API_TOKEN: !GetAtt TelegramBotApiTokenParameter.Value
         TELEGRAM_ADMIN_CHAT_ID: !GetAtt TelegramAdminChatIdParameter.Value
@@ -72,6 +73,10 @@ Resources:
     Type: AWS::SQS::Queue
     Properties:
       QueueName: CoinMarketWhatLogsQueue
+  CallbackQueriesQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: CoinMarketWhatCallbackQueriesQueue
   LogsBucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -118,6 +123,7 @@ Resources:
                 - sqs:*
               Resource:
                 - !GetAtt LogsQueue.Arn
+                - !GetAtt CallbackQueriesQueue.Arn
             - Effect: Allow
               Action:
                 - s3:GetObject
@@ -171,7 +177,17 @@ Resources:
           Type: Schedule
           Properties:
             Schedule: rate(1 day)
-
+  AnswerCallbackQueryFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: lambda.Lambda::AnswerCallbackQuery.call
+      Policies:
+        - AWSLambdaBasicExecutionRole
+      Events:
+        SQSLogsEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt CallbackQueriesQueue.Arn
 Outputs:
   WebhooksApi:
     Description: "API Gateway endpoint URL for Prod stage for Telegram Webhooks function"

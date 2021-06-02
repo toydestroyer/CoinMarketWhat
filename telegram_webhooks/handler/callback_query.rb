@@ -10,6 +10,7 @@ module Handler
       @chat_instance = BigDecimal(query['chat_instance'])
       @state = CallbackData.parse(query['data'])
       @price = render_price(amount: symbol['current_price'], quote: state.quote)
+      enqueue_answer_callback_query
     end
 
     def method_name
@@ -25,6 +26,13 @@ module Handler
     end
 
     private
+
+    def enqueue_answer_callback_query
+      Lambda.sqs.send_message(
+        queue_url: ENV['CALLBACK_QUERIES_QUEUE'],
+        message_body: query.to_json
+      )
+    end
 
     def symbol
       @symbol ||= begin

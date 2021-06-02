@@ -23,6 +23,7 @@ require_relative './handler/message'
 require_relative './telegram/user'
 
 require_relative './lambda/base'
+require_relative './lambda/answer_callback_query'
 require_relative './lambda/cache'
 require_relative './lambda/logger'
 require_relative './lambda/webhook'

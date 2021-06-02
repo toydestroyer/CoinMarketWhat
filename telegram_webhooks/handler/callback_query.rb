@@ -48,7 +48,7 @@ module Handler
     def render_price(amount:, quote:)
       Money.from_amount(amount, quote).format
     rescue Money::Currency::UnknownCurrency => _e
-      "#{amount} #{quote}"
+      Money.from_amount(amount).format(symbol: quote, symbol_position: :after)
     end
   end
 end

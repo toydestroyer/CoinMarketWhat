@@ -18,6 +18,10 @@ module DataSource
       end
 
       def pairs(id:)
+        puts id
+        puts CoinGecko.available_assets.size
+        puts CoinGecko.available_assets[id]
+        puts slug
         CoinGecko.available_assets[id]['tickers'][slug]['quotes']
       end
 

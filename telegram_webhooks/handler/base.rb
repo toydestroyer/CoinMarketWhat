@@ -11,7 +11,7 @@ module Handler
     end
 
     def process
-      RestClient.get("https://api.telegram.org/bot#{token}/#{method_name}", params: params)
+      puts RestClient.post("https://api.telegram.org/bot#{token}/#{method_name}", params)
     end
 
     def respond
@@ -66,6 +66,9 @@ module Handler
     end
 
     def build_data_sources_row(state)
+      puts state.base
+      puts DataSource::CoinGecko.available_assets.size
+      puts DataSource::CoinGecko.available_assets[state.base]
       DataSource::CoinGecko.available_assets[state.base]['tickers'].keys.map do |item|
         build_data_source_button(item: item, state: state.dup)
       end

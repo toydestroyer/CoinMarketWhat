@@ -34,6 +34,8 @@ class CallbackData
     result = {}
 
     DATA_SOURCES_MAP.each do |slug, data_source|
+      next unless DataSource::CoinGecko.available_assets[base]['tickers'].key?(slug)
+
       result[slug] = if slug == source
                        visible_pairs(data_source: data_source, offset: quote_offset).uniq
                      else

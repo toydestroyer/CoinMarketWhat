@@ -8,11 +8,10 @@ module Lambda
 
       event['Records'].each do |record|
         record = JSON.parse(record['body'])
-        puts record
 
         RestClient.get("https://api.telegram.org/bot#{token}/answerCallbackQuery", params: {
-          callback_query_id: record['id']
-        })
+                         callback_query_id: record['id']
+                       })
       end
     end
   end

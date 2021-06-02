@@ -15,10 +15,14 @@ module Command
       {}
     end
 
+    def method_name
+      'sendMessage'
+    end
+
     def process
       params = message.merge(chat_id: chat['id'])
 
-      RestClient.get("https://api.telegram.org/bot#{token}/sendMessage", params: params)
+      RestClient.get("https://api.telegram.org/bot#{token}/#{method_name}", params: params)
     end
   end
 end

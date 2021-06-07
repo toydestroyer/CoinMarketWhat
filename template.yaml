@@ -18,6 +18,7 @@ Globals:
         TELEGRAM_BOT_API_TOKEN: !GetAtt TelegramBotApiTokenParameter.Value
         TELEGRAM_ADMIN_CHAT_ID: !GetAtt TelegramAdminChatIdParameter.Value
         DONATION_ADDRESS: !GetAtt DonationAddressParameter.Value
+        # GENERATE_IMAGES_API: !Ref ImagesApi
 
 Resources:
   TelegramBotApiTokenParameter:
@@ -102,6 +103,8 @@ Resources:
           IpRangeWhitelist:
             - "149.154.160.0/20"
             - "91.108.4.0/22"
+  ImagesApi:
+    Type: AWS::Serverless::HttpApi
   TelegramWebhooks:
     Type: AWS::Serverless::Function
     Properties:
@@ -216,6 +219,20 @@ Resources:
             FilterPolicy:
               event_name:
                 - callback_query
+  GenerateImagesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: generate_images/
+      Handler: generate-images
+      Runtime: go1.x
+      MemorySize: 256
+      Events:
+        Generate:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ImagesApi
+            Path: /
+            Method: GET
 Outputs:
   WebhooksApi:
     Description: "API Gateway endpoint URL for Prod stage for Telegram Webhooks function"

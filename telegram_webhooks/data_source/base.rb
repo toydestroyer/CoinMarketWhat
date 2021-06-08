@@ -35,7 +35,7 @@ module DataSource
         return render_cached_prices(valid_prices) if valid_prices.size == ids.size
 
         latest_prices = fetch_prices(ids: ids, quote: quote)
-        cache_prices(prices: latest_prices, quote: quote)
+        cache_prices(latest_prices)
 
         latest_prices
       end
@@ -56,11 +56,11 @@ module DataSource
         resp.responses['CoinMarketWhatDB'].select { |item| Time.now.to_i < item['valid_to'].to_i }
       end
 
-      def cache_prices(prices:, quote:)
-        update = prices.map do |item|
+      def cache_prices(items)
+        update = items.map do |item|
           {
             put_request: {
-              item: build_put_request_item(item: item, quote: quote)
+              item: build_put_request_item(item)
             }
           }
         end
@@ -92,9 +92,11 @@ module DataSource
         [id, slug, quote].join(':')
       end
 
-      def build_put_request_item(item:, quote:)
+      def build_put_request_item(item)
+        resource_id = price_id(id: item['id'], quote: item['quote'])
+
         {
-          resource_id: price_id(id: item['id'], quote: quote),
+          resource_id: resource_id,
           resource_type: 'price',
           price: item['current_price'],
           name: item['name'],

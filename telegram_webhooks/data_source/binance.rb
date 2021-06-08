@@ -17,20 +17,35 @@ module DataSource
           }
         )
 
-        render_prices(body: JSON.parse(res.body), id: id, asset: asset)
+        render_prices(body: JSON.parse(res.body), id: id, asset: asset, quote: quote)
       end
 
-      def render_prices(body:, id:, asset:)
+      def render_prices(body:, id:, asset:, quote:)
         price = body['price'].to_f
 
         [
           {
             'id' => id,
             'symbol' => asset['symbol'],
+            'quote' => quote,
             'name' => asset['name'],
             'current_price' => price
           }
         ]
+      end
+
+      def fetch_batch_prices(id:, quotes:)
+        asset = CoinGecko.available_assets[id]
+        symbol = asset['symbol']
+        symbols = quotes.map { |quote| "#{symbol}#{quote}" }
+
+        res = RestClient.get('https://api.binance.com/api/v3/ticker/price')
+        result = JSON.parse(res)
+        result = result.select { |item| symbols.include?(item['symbol']) }
+
+        items = build_price_items(result: result, id: id, asset: asset)
+
+        cache_prices(items)
       end
 
       def load_assets
@@ -42,6 +57,21 @@ module DataSource
             base: symbol['baseAsset'],
             quote: symbol['quoteAsset'],
             ticker: symbol['symbol']
+          }
+        end
+      end
+
+      private
+
+      def build_price_items(result:, id:, asset:)
+        result.map do |item|
+          {
+            'current_price' => item['price'].to_f,
+            'quote' => item['symbol'][asset['symbol'].size...],
+            'name' => asset['name'],
+            'symbol' => asset['symbol'],
+            'id' => id,
+            'image' => asset['image']
           }
         end
       end

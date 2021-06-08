@@ -9,6 +9,7 @@ module Handler
 
       @chat_instance = BigDecimal(query['chat_instance'])
       @state = CallbackData.parse(query['data'])
+      enqueue_visible({ state.base => state.visible })
       @price = render_price(amount: symbol['current_price'], quote: state.quote)
       enqueue_answer_callback_query
     end
@@ -31,6 +32,15 @@ module Handler
       Lambda.sqs.send_message(
         queue_url: ENV['CALLBACK_QUERIES_QUEUE'],
         message_body: query.to_json
+      )
+    end
+
+    def enqueue_visible(params)
+      puts params
+
+      Lambda.sqs.send_message(
+        queue_url: ENV['PRE_CACHE_QUEUE'],
+        message_body: params.to_json
       )
     end
 

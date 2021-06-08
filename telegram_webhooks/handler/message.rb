@@ -52,14 +52,12 @@ module Handler
     end
 
     def forward_message
-      RestClient.get(
+      puts RestClient.post(
         "https://api.telegram.org/bot#{token}/forwardMessage",
-        params: {
-          chat_id: admin_chat_id,
-          from_chat_id: chat['id'],
-          disable_notification: true,
-          message_id: id
-        }
+        chat_id: admin_chat_id,
+        from_chat_id: chat['id'],
+        disable_notification: true,
+        message_id: id
       )
     end
 

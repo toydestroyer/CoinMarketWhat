@@ -10,7 +10,7 @@ module DataSource
       # For CoinGecko id is not in use because list of pairs is static
       # Full list of supported pairs here https://api.coingecko.com/api/v3/simple/supported_vs_currencies
       # rubocop:disable Lint/UnusedMethodArgument
-      def pairs(id:, matching: nil)
+      def pairs(id:)
         vs_currencies
       end
       # rubocop:enable Lint/UnusedMethodArgument
@@ -23,7 +23,28 @@ module DataSource
           }
         )
 
-        JSON.parse(res.body)
+        JSON.parse(res.body).map { |item| item.merge('quote' => quote) }
+      end
+
+      def fetch_batch_prices(id:, quotes:)
+        asset = available_assets[id]
+
+        res = RestClient.get('https://api.coingecko.com/api/v3/simple/price',
+                             { params: { ids: id, vs_currencies: quotes.join(',') } })
+        result = JSON.parse(res)[id]
+
+        items = result.map do |quote, price|
+          {
+            'current_price' => price,
+            'quote' => quote.upcase,
+            'name' => asset['name'],
+            'symbol' => asset['symbol'],
+            'id' => id,
+            'image' => asset['image']
+          }
+        end
+
+        cache_prices(items)
       end
 
       def load_assets

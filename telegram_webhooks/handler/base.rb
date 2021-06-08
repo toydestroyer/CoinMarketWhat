@@ -11,7 +11,7 @@ module Handler
     end
 
     def process
-      RestClient.get("https://api.telegram.org/bot#{token}/#{method_name}", params: params)
+      puts RestClient.post("https://api.telegram.org/bot#{token}/#{method_name}", params)
     end
 
     def respond

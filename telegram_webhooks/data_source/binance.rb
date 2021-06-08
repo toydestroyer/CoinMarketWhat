@@ -43,7 +43,7 @@ module DataSource
         result = JSON.parse(res)
         result = result.select { |item| symbols.include?(item['symbol']) }
 
-        items = build_price_items(result: result, asset: asset, symbol: symbol)
+        items = build_price_items(result: result, id: id, asset: asset)
 
         cache_prices(items)
       end
@@ -63,15 +63,15 @@ module DataSource
 
       private
 
-      def build_price_items(result:, asset:)
+      def build_price_items(result:, id:, asset:)
         result.map do |item|
           {
-            price: item['price'].to_f,
-            quote: item['symbol'][symbol.size...],
-            name: asset['name'],
-            symbol: asset['symbol'],
-            id: asset['id'],
-            image: asset['image']
+            'current_price' => item['price'].to_f,
+            'quote' => item['symbol'][asset['symbol'].size...],
+            'name' => asset['name'],
+            'symbol' => asset['symbol'],
+            'id' => id,
+            'image' => asset['image']
           }
         end
       end

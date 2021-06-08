@@ -23,7 +23,7 @@ module DataSource
           }
         )
 
-        JSON.parse(res.body).map { |item| item.merge(quote: quote) }
+        JSON.parse(res.body).map { |item| item.merge('quote' => quote) }
       end
 
       def fetch_batch_prices(id:, quotes:)
@@ -35,12 +35,12 @@ module DataSource
 
         items = result.map do |quote, price|
           {
-            price: price,
-            quote: quote,
-            name: asset['name'],
-            symbol: asset['symbol'],
-            id: asset['id'],
-            image: asset['image']
+            'current_price' => price,
+            'quote' => quote.upcase,
+            'name' => asset['name'],
+            'symbol' => asset['symbol'],
+            'id' => id,
+            'image' => asset['image']
           }
         end
 

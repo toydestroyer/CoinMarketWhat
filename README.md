@@ -1,5 +1,14 @@
-# CoinMarketWhat ![](https://github.com/toydestroyer/CoinMarketWhat/actions/workflows/rubocop.yml/badge.svg) ![](https://github.com/toydestroyer/CoinMarketWhat/actions/workflows/rspec.yml/badge.svg)
+# CoinMarketWhat!? ![](https://github.com/toydestroyer/CoinMarketWhat/actions/workflows/rubocop.yml/badge.svg) ![](https://github.com/toydestroyer/CoinMarketWhat/actions/workflows/rspec.yml/badge.svg)
 Inline Telegram bot to answer "How much is %shitcoin% right now?" kind of questions.
+
+## How it works
+
+
+https://user-images.githubusercontent.com/578554/121365284-18d18500-c96b-11eb-93bb-05ddfe7f2915.mp4
+
+
+
+
 
 ## Deploy
 1. Make sure you have [AWS credentials configured](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html) and [AWS SAM CLI installed](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html). User should have permissions to IAM, S3, SQS, DynamoDB, APIGateway, SSM, Lambda, CloudWatchEvents and CloudFormation.

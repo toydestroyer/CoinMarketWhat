@@ -16,6 +16,7 @@ services:
       - LOGS_QUEUE=http://localstack:4566/000000000000/CoinMarketWhatLogsQueue
       - LOGS_BUCKET=logs-bucket
       - CACHE_BUCKET=cache-bucket
+      - TELEGRAM_BOT_API_TOKEN=123:token
     volumes:
       - .:/app
       - bundle:/usr/local/bundle

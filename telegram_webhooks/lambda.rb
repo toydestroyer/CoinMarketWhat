@@ -7,37 +7,12 @@ require 'aws-sdk-s3'
 require 'rest-client'
 require 'money'
 require 'sentry-ruby'
+require 'zeitwerk'
 
-require_relative './command/base'
-require_relative './command/donate'
-require_relative './command/how_to'
-require_relative './command/not_found'
-require_relative './command/start'
-require_relative './command/finder'
-
-require_relative './handler/base'
-require_relative './handler/callback_query'
-require_relative './handler/inline_query'
-require_relative './handler/message'
-
-require_relative './telegram/user'
-
-require_relative './lambda/base'
-require_relative './lambda/answer_callback_query'
-require_relative './lambda/cache'
-require_relative './lambda/logger'
-require_relative './lambda/pre_cacher'
-require_relative './lambda/webhook'
-
-require_relative './data_source/base'
-require_relative './data_source/binance'
-require_relative './data_source/coingecko'
-
-require_relative './cacher'
-require_relative './callback_data'
-require_relative './event_log'
-require_relative './exception_handler'
-require_relative './searcher'
+loader = Zeitwerk::Loader.new
+loader.push_dir(__dir__)
+loader.inflector.inflect('coingecko' => 'CoinGecko')
+loader.setup
 
 Sentry.init do |config|
   # Send events synchronously

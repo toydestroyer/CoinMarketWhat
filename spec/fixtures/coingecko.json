@@ -1,0 +1,62 @@
+{
+  "bitcoin": {
+    "symbol": "BTC",
+    "name": "Bitcoin",
+    "image": "https://assets.coingecko.com/coins/images/1/large/bitcoin.png?1547033579",
+    "rank": 1,
+    "tickers": {
+      "coingecko": {
+        "symbol": "BTC",
+        "quotes": null
+      },
+      "binance": {
+        "symbol": "BTC",
+        "quotes": [
+          "USDT",
+          "BUSD",
+          "EUR"
+        ]
+      }
+    }
+  },
+  "ethereum": {
+    "symbol": "ETH",
+    "name": "Ethereum",
+    "image": "https://assets.coingecko.com/coins/images/279/large/ethereum.png?1595348880",
+    "rank": 2,
+    "tickers": {
+      "coingecko": {
+        "symbol": "ETH",
+        "quotes": null
+      },
+      "binance": {
+        "symbol": "ETH",
+        "quotes": [
+          "USDT",
+          "BUSD",
+          "BTC"
+        ]
+      }
+    }
+  },
+  "bitcoin-cash": {
+    "symbol": "BCH",
+    "name": "Bitcoin Cash",
+    "image": "https://assets.coingecko.com/coins/images/780/large/bitcoin-cash-circle.png?1594689492",
+    "rank": 11,
+    "tickers": {
+      "coingecko": {
+        "symbol": "BCH",
+        "quotes": null
+      },
+      "binance": {
+        "symbol": "BCH",
+        "quotes": [
+          "USDT",
+          "BTC",
+          "BNB"
+        ]
+      }
+    }
+  }
+}

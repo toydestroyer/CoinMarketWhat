@@ -231,7 +231,7 @@ Resources:
           Type: HttpApi
           Properties:
             ApiId: !Ref ImagesApi
-            Path: /
+            Path: /{params}
             Method: GET
 Outputs:
   WebhooksApi:

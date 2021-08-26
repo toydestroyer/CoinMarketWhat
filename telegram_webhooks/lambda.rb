@@ -2,6 +2,7 @@
 
 require 'json'
 require 'aws-sdk-dynamodb'
+require 'aws-sdk-sns'
 require 'aws-sdk-sqs'
 require 'aws-sdk-s3'
 require 'rest-client'
@@ -45,6 +46,10 @@ module Lambda
   class << self
     def dynamodb
       @dynamodb ||= Aws::DynamoDB::Client.new(aws_config)
+    end
+
+    def sns
+      @sns ||= Aws::SNS::Client.new(aws_config)
     end
 
     def sqs

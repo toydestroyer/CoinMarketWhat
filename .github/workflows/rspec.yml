@@ -26,7 +26,6 @@ jobs:
           AWS_ACCESS_KEY_ID: test
           AWS_SECRET_ACCESS_KEY: test
           AWS_REGION: test
-          LOGS_QUEUE: http://localhost:4566/000000000000/CoinMarketWhatLogsQueue
           LOGS_BUCKET: logs-bucket
           CACHE_BUCKET: cache-bucket
         run: |

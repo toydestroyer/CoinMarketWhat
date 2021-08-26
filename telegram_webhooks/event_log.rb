@@ -2,12 +2,18 @@
 
 class EventLog
   class << self
-    def enqueue(event)
+    def enqueue(event, event_name:)
       puts event
 
-      Lambda.sqs.send_message(
-        queue_url: ENV['LOGS_QUEUE'],
-        message_body: event
+      Lambda.sns.publish(
+        topic_arn: ENV['EVENTS_TOPIC'],
+        message: event,
+        message_attributes: {
+          event_name: {
+            data_type: 'String',
+            string_value: event_name
+          }
+        }
       )
     end
   end
@@ -15,14 +21,14 @@ class EventLog
   attr_reader :body, :update_id, :event_type, :time
 
   def initialize(log)
-    @body = JSON.parse(log['body'])
+    @body = JSON.parse(log['Message'])
     @update_id = @body.delete('update_id')
 
     raise 'missing update_id' unless @update_id
     raise 'only 1 key can be processed' unless @body.keys.size == 1
 
     @event_type = @body.keys.first
-    @time = Time.at(0, log['attributes']['SentTimestamp'].to_i, :millisecond)
+    @time = Time.parse(log['Timestamp'])
   end
 
   def save

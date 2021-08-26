@@ -9,7 +9,6 @@ RSpec.configure do |config|
   end
 
   config.after(:suite) do
-    Lambda.sqs.delete_queue(queue_url: ENV['LOGS_QUEUE'])
     Lambda.s3.delete_bucket(bucket: ENV['LOGS_BUCKET'])
 
     empty_bucket(ENV['CACHE_BUCKET'])

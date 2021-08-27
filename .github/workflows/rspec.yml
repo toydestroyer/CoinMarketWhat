@@ -9,7 +9,7 @@ jobs:
         ports:
           - 4566:4566
         env:
-          SERVICES: dynamodb,sqs,s3
+          SERVICES: dynamodb,sns,sqs,s3
     steps:
       - uses: actions/checkout@v2
       - name: Setup Ruby

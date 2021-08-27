@@ -2,7 +2,6 @@
 
 RSpec.configure do |config|
   config.before(:suite) do
-    Lambda.sqs.create_queue(queue_name: 'CoinMarketWhatLogsQueue')
     Lambda.s3.create_bucket(bucket: ENV['LOGS_BUCKET'])
     Lambda.s3.create_bucket(bucket: ENV['CACHE_BUCKET'])
     Lambda.s3.put_object(key: 'coingecko.json', bucket: ENV['CACHE_BUCKET'], body: file_fixture('coingecko.json'))

@@ -10,10 +10,9 @@ Globals:
     Timeout: 3
     Environment:
       Variables:
+        EVENTS_TOPIC: !Ref EventsTopic
         CACHE_BUCKET: !Ref CacheBucket
         LOGS_BUCKET: !Ref LogsBucket
-        LOGS_QUEUE: !Ref LogsQueue
-        CALLBACK_QUERIES_QUEUE: !Ref CallbackQueriesQueue
         PRE_CACHE_QUEUE: !Ref PreCacheQueue
         SENTRY_DSN: !GetAtt SentryDsnParameter.Value
         TELEGRAM_BOT_API_TOKEN: !GetAtt TelegramBotApiTokenParameter.Value
@@ -70,14 +69,8 @@ Resources:
         -
           AttributeName: resource_type
           KeyType: RANGE
-  LogsQueue:
-    Type: AWS::SQS::Queue
-    Properties:
-      QueueName: CoinMarketWhatLogsQueue
-  CallbackQueriesQueue:
-    Type: AWS::SQS::Queue
-    Properties:
-      QueueName: CoinMarketWhatCallbackQueriesQueue
+  EventsTopic:
+    Type: AWS::SNS::Topic
   PreCacheQueue:
     Type: AWS::SQS::Queue
     Properties:
@@ -127,9 +120,10 @@ Resources:
               Action:
                 - sqs:*
               Resource:
-                - !GetAtt LogsQueue.Arn
-                - !GetAtt CallbackQueriesQueue.Arn
                 - !GetAtt PreCacheQueue.Arn
+            - Effect: Allow
+              Action: sns:Publish
+              Resource: !Ref EventsTopic
             - Effect: Allow
               Action:
                 - s3:GetObject
@@ -158,10 +152,10 @@ Resources:
                 - ${BucketArn}/*
                 - { BucketArn: !GetAtt LogsBucket.Arn }
       Events:
-        SQSLogsEvent:
-          Type: SQS
+        AllEvents:
+          Type: SNS
           Properties:
-            Queue: !GetAtt LogsQueue.Arn
+            Topic: !Ref EventsTopic
   PreCacheFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -215,10 +209,13 @@ Resources:
       Policies:
         - AWSLambdaBasicExecutionRole
       Events:
-        SQSLogsEvent:
-          Type: SQS
+        CallbackQueryEvents:
+          Type: SNS
           Properties:
-            Queue: !GetAtt CallbackQueriesQueue.Arn
+            Topic: !Ref EventsTopic
+            FilterPolicy:
+              event_name:
+                - callback_query
 Outputs:
   WebhooksApi:
     Description: "API Gateway endpoint URL for Prod stage for Telegram Webhooks function"

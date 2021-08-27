@@ -5,7 +5,7 @@ services:
     ports:
       - 4566:4566
     environment:
-      - SERVICES=dynamodb,sqs,s3
+      - SERVICES=dynamodb,sns,sqs,s3
   app:
     build: .
     environment:
@@ -13,7 +13,6 @@ services:
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
       - AWS_REGION=test
-      - LOGS_QUEUE=http://localstack:4566/000000000000/CoinMarketWhatLogsQueue
       - LOGS_BUCKET=logs-bucket
       - CACHE_BUCKET=cache-bucket
       - TELEGRAM_BOT_API_TOKEN=123:token

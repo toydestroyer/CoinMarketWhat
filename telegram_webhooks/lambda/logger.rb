@@ -4,7 +4,7 @@ module Lambda
   class Logger < Base
     def process
       event['Records'].each do |log|
-        event_log = EventLog.new(log)
+        event_log = EventLog.new(log['Sns'])
         event_log.save
       end
     end

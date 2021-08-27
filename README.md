@@ -11,7 +11,7 @@ https://user-images.githubusercontent.com/578554/121365284-18d18500-c96b-11eb-93
 
 
 ## Deploy
-1. Make sure you have [AWS credentials configured](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html) and [AWS SAM CLI installed](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html). User should have permissions to IAM, S3, SQS, DynamoDB, APIGateway, SSM, Lambda, CloudWatchEvents and CloudFormation.
+1. Make sure you have [AWS credentials configured](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html) and [AWS SAM CLI installed](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html). User should have permissions to IAM, S3, SNS, SQS, DynamoDB, APIGateway, SSM, Lambda, CloudWatchEvents and CloudFormation.
 
 1. For the first time deployment, run this command to do a guided deploy and generate `samconfig.toml`:
 
@@ -22,7 +22,7 @@ https://user-images.githubusercontent.com/578554/121365284-18d18500-c96b-11eb-93
     ```bash
     sam deploy
     ```
- 
+
 3. Take `WebhooksApi` value from the output and use it as the `url` in [`setWebhook`](https://core.telegram.org/bots/api#setwebhook)
 4. Go to [AWS System Manager - Parameter Store](https://console.aws.amazon.com/systems-manager/parameters) and set proper values for all `/CoinMarketWhat/*` parameters.
 5. Lastly, you should manually trigger the `CacheFunction` to cache available assets and tickers. This needs to be done only once before start using the bot for the first time.

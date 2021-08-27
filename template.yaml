@@ -53,8 +53,8 @@ Resources:
         AttributeName: valid_to
         Enabled: true
       ProvisionedThroughput:
-        ReadCapacityUnits: 25
-        WriteCapacityUnits: 25
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
       AttributeDefinitions:
         -
           AttributeName: resource_id

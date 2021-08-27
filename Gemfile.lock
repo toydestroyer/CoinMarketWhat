@@ -21,6 +21,9 @@ GEM
       aws-sdk-core (~> 3, >= 3.119.0)
       aws-sdk-kms (~> 1)
       aws-sigv4 (~> 1.1)
+    aws-sdk-sns (1.44.0)
+      aws-sdk-core (~> 3, >= 3.119.0)
+      aws-sigv4 (~> 1.1)
     aws-sdk-sqs (1.42.0)
       aws-sdk-core (~> 3, >= 3.119.0)
       aws-sigv4 (~> 1.1)
@@ -132,6 +135,7 @@ PLATFORMS
 DEPENDENCIES
   aws-sdk-dynamodb
   aws-sdk-s3
+  aws-sdk-sns
   aws-sdk-sqs
   money
   rest-client

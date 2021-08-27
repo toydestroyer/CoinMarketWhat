@@ -3,8 +3,8 @@
 RSpec.describe Lambda::AnswerCallbackQuery, :with_lambda do
   let(:event) { { 'Records' => [record] } }
   let(:callback_query) { json_fixture('telegram/callback_query.json') }
-  let(:record) { { 'body' => body } }
-  let(:body) { callback_query['callback_query'].to_json }
+  let(:record) { { 'Sns' => { 'Message' => body } } }
+  let(:body) { callback_query.to_json }
   let(:stub_url) { "https://api.telegram.org/bot#{ENV['TELEGRAM_BOT_API_TOKEN']}/answerCallbackQuery" }
 
   before do

@@ -11,7 +11,6 @@ module Handler
       @state = CallbackData.parse(query['data'])
       enqueue_visible({ state.base => state.visible })
       @price = render_price(amount: symbol['current_price'], quote: state.quote)
-      enqueue_answer_callback_query
     end
 
     def method_name
@@ -27,13 +26,6 @@ module Handler
     end
 
     private
-
-    def enqueue_answer_callback_query
-      Lambda.sqs.send_message(
-        queue_url: ENV['CALLBACK_QUERIES_QUEUE'],
-        message_body: query.to_json
-      )
-    end
 
     def enqueue_visible(params)
       puts params
@@ -57,7 +49,7 @@ module Handler
 
     def render_price(amount:, quote:)
       Money.from_amount(amount, quote).format
-    rescue Money::Currency::UnknownCurrency => _e
+    rescue Money::Currency::UnknownCurrency
       Money.from_amount(amount).format(symbol: quote, symbol_position: :after)
     end
   end

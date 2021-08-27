@@ -6,6 +6,7 @@ ruby '~> 2.7.0'
 
 gem 'aws-sdk-dynamodb'
 gem 'aws-sdk-s3'
+gem 'aws-sdk-sns'
 gem 'aws-sdk-sqs'
 
 gem 'money'

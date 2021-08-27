@@ -20,7 +20,7 @@ RSpec.describe Lambda::Webhook, :with_lambda do
     it 'sends log to queue' do
       result
 
-      expect(EventLog).to have_received(:enqueue).with({ random: 'param' }.to_json)
+      expect(EventLog).to have_received(:enqueue).with({ random: 'param' }.to_json, event_name: 'random')
     end
 
     it "doesn't captures any exceptions" do

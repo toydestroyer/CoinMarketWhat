@@ -2,7 +2,7 @@
 
 RSpec.describe Lambda::Logger, :with_lambda do
   let(:event) { { 'Records' => records } }
-  let(:records) { [{ 'body' => body, 'attributes' => { 'SentTimestamp' => '1621341605522' } }] }
+  let(:records) { [{ 'Sns' => { 'Message' => body, 'Timestamp' => '2021-05-18T12:45:07.000Z' } }] }
   let(:body) { file_fixture('telegram/callback_query.json') }
   let(:s3) { Lambda.s3 }
 

@@ -1,3 +1,5 @@
+![CoinMarketWhat](misc/logo_main_64.png)
+
 # CoinMarketWhat!? ![](https://github.com/toydestroyer/CoinMarketWhat/actions/workflows/rubocop.yml/badge.svg) ![](https://github.com/toydestroyer/CoinMarketWhat/actions/workflows/rspec.yml/badge.svg)
 Inline Telegram bot to answer "How much is %shitcoin% right now?" kind of questions.
 
@@ -26,3 +28,7 @@ https://user-images.githubusercontent.com/578554/121365284-18d18500-c96b-11eb-93
 3. Take `WebhooksApi` value from the output and use it as the `url` in [`setWebhook`](https://core.telegram.org/bots/api#setwebhook)
 4. Go to [AWS System Manager - Parameter Store](https://console.aws.amazon.com/systems-manager/parameters) and set proper values for all `/CoinMarketWhat/*` parameters.
 5. Lastly, you should manually trigger the `CacheFunction` to cache available assets and tickers. This needs to be done only once before start using the bot for the first time.
+
+## Thanks
+
+Logo by [Denis Foster](https://www.instagram.com/ikarisindzi/).

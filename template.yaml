@@ -225,7 +225,16 @@ Resources:
       CodeUri: generate_images/
       Handler: generate-images
       Runtime: go1.x
-      MemorySize: 256
+      MemorySize: 2048
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+              Resource:
+                - !GetAtt DynamoDBTable.Arn
       Events:
         Generate:
           Type: HttpApi

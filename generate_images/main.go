@@ -8,6 +8,7 @@ import (
 	"image"
 	"image/color"
 	"image/jpeg"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -15,23 +16,26 @@ import (
 	"time"
 
 	"github.com/fogleman/gg"
+	"github.com/golang/freetype/truetype"
 	"github.com/nfnt/resize"
 	"github.com/wcharczuk/go-chart/v2"
 	"github.com/wcharczuk/go-chart/v2/drawing"
-
-	"github.com/superoo7/go-gecko/v3"
-	geckoTypes "github.com/superoo7/go-gecko/v3/types"
 
 	"github.com/leekchan/accounting"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 )
 
 type Params struct {
-	Base  string `json:"base"`
-	Quote string `json:"quote"`
-	Time  int    `json:"random"`
+	Base   string `json:"base"`
+	Source string `json:"source"`
+	Quote  string `json:"quote"`
+	Time   int    `json:"random"`
 }
 
 type Direction struct {
@@ -55,36 +59,183 @@ var (
 )
 
 type Theme struct {
-	bgColorA       color.NRGBA
-	bgColorB       color.NRGBA
-	timestampColor color.NRGBA
-	tickerColor    color.NRGBA
-	nameColor      color.NRGBA
-	priceColor     color.NRGBA
-	logoPath       string
+	bgColor                        []color.NRGBA
+	timestamp, ticker, name, price *ThemeFont
+	logoPath                       string
+}
+
+type ThemeFont struct {
+	color                color.NRGBA
+	fontName             string
+	fontSize, lineHeight uint16
+}
+
+func (themeFont *ThemeFont) ApplyToContext(dc *gg.Context) {
+	dc.SetColor(themeFont.color)
+
+	face := truetype.NewFace(themeFont.GetFontFace(), &truetype.Options{
+		Size: float64(themeFont.fontSize),
+	})
+
+	dc.SetFontFace(face)
+}
+
+func (themeFont *ThemeFont) GetFontFace() *truetype.Font {
+	if fonts[themeFont.fontName] == nil {
+		fontBytes, err := ioutil.ReadFile(fmt.Sprintf("./fonts/%s.ttf", themeFont.fontName))
+		if err != nil {
+			panic(err)
+		}
+
+		font, err := truetype.Parse(fontBytes)
+		if err != nil {
+			panic(err)
+		}
+
+		fonts[themeFont.fontName] = font
+	}
+
+	return fonts[themeFont.fontName]
+}
+
+func (theme *Theme) GetLogo() *image.Image {
+	if logos[theme.logoPath] != nil {
+		return logos[theme.logoPath]
+	}
+
+	f, err := os.Open(theme.logoPath)
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+
+	logo, _, _ := image.Decode(f)
+
+	logos[theme.logoPath] = &logo
+
+	return logos[theme.logoPath]
 }
 
 var (
 	DarkTheme = &Theme{
-		color.NRGBA{13, 27, 41, 255},
-		color.NRGBA{1, 23, 45, 255},
-		color.NRGBA{52, 73, 94, 255},
-		color.NRGBA{255, 255, 255, 255},
-		color.NRGBA{171, 171, 171, 255},
-		color.NRGBA{255, 255, 255, 255},
+		// Background colors
+		[]color.NRGBA{color.NRGBA{13, 27, 41, 255}, color.NRGBA{1, 23, 45, 255}},
+		// timestamp
+		&ThemeFont{
+			color.NRGBA{52, 73, 94, 255},
+			"Lato/Lato-Regular",
+			18,
+			22,
+		},
+		// ticker
+		&ThemeFont{
+			color.NRGBA{255, 255, 255, 255},
+			"Lato/Lato-BoldItalic",
+			32,
+			38,
+		},
+		// name
+		&ThemeFont{
+			color.NRGBA{171, 171, 171, 255},
+			"Lato/Lato-Regular",
+			18,
+			22,
+		},
+		// price
+		&ThemeFont{
+			color.NRGBA{255, 255, 255, 255},
+			"Fira_Sans/FiraSans-Light",
+			34,
+			38,
+		},
 		"./images/logo-dark.png",
 	}
 
 	LightTheme = &Theme{
-		color.NRGBA{236, 240, 241, 255},
-		color.NRGBA{243, 247, 248, 255},
-		color.NRGBA{171, 171, 171, 255},
-		color.NRGBA{47, 46, 51, 255},
-		color.NRGBA{171, 171, 171, 255},
-		color.NRGBA{47, 46, 51, 255},
+		// Background colors
+		[]color.NRGBA{color.NRGBA{236, 240, 241, 255}, color.NRGBA{243, 247, 248, 255}},
+		// timestamp
+		&ThemeFont{
+			color.NRGBA{171, 171, 171, 255},
+			"Lato/Lato-Regular",
+			18,
+			22,
+		},
+		// ticker
+		&ThemeFont{
+			color.NRGBA{47, 46, 51, 255},
+			"Lato/Lato-BoldItalic",
+			32,
+			38,
+		},
+		// name
+		&ThemeFont{
+			color.NRGBA{171, 171, 171, 255},
+			"Lato/Lato-Regular",
+			18,
+			22,
+		},
+		// price
+		&ThemeFont{
+			color.NRGBA{47, 46, 51, 255},
+			"Fira_Sans/FiraSans-Light",
+			34,
+			38,
+		},
 		"./images/logo-light.png",
 	}
 )
+
+var (
+	dynamodbClient *dynamodb.DynamoDB
+	fonts          map[string]*truetype.Font
+	logos          map[string]*image.Image
+)
+
+type Item struct {
+	Id                       string    `dynamodbav:"id"`
+	Name                     string    `dynamodbav:"name"`
+	Symbol                   string    `dynamodbav:"symbol"`
+	Image                    string    `dynamodbav:"image"`
+	Price                    float64   `dynamodbav:"price"`
+	Sparkline                []float64 `dynamodbav:"sparkline"`
+	PriceChangePercentage24h float64   `dynamodbav:"price_change_percentage_24h"`
+}
+
+func (item *Item) GetLogo() *image.Image {
+	log.Printf("Logos in cache: %d", len(logos))
+
+	if logos[item.Id] != nil {
+		log.Printf("Reusing logo: %s", item.Id)
+		return logos[item.Id]
+	}
+
+	log.Printf("Getting logo: %s", item.Id)
+
+	response, err := http.Get(item.Image)
+	if err != nil {
+		panic(err)
+	}
+
+	currentLogo, _, _ := image.Decode(response.Body)
+	response.Body.Close()
+	resized := resize.Resize(60, 0, currentLogo, resize.NearestNeighbor)
+	logos[item.Id] = &resized
+
+	return logos[item.Id]
+}
+
+func (item *Item) GetStarklineValues() ([]float64, []float64) {
+	xValues := []float64{}
+	yValues := []float64{}
+
+	for i, l := range item.Sparkline {
+		xValues = append(xValues, float64(i))
+		yValues = append(yValues, l)
+	}
+
+	return xValues, yValues
+}
 
 func getSparklines(width, height int, color color.NRGBA, xValues, yValues []float64) image.Image {
 	chartColor := drawing.Color{R: color.R, G: color.G, B: color.B, A: color.A}
@@ -163,43 +314,44 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 
 	_ = json.Unmarshal(decoded_params, &params)
 
-	httpClient := &http.Client{}
-	cg := coingecko.NewClient(httpClient)
+	tableName := "CoinMarketWhatDB"
+	resourceId := fmt.Sprintf("%s:%s:%s", params.Base, params.Source, params.Quote)
+	log.Printf("ResourceId: %s", resourceId)
+	resourceType := "price"
 
-	vsCurrency := params.Quote
-	ids := []string{params.Base}
-	perPage := 1
-	page := 1
-	order := geckoTypes.OrderTypeObject.MarketCapDesc
-	pcp := geckoTypes.PriceChangePercentageObject
+	result, _ := dynamodbClient.GetItem(&dynamodb.GetItemInput{
+		TableName: aws.String(tableName),
+		Key: map[string]*dynamodb.AttributeValue{
+			"resource_id": {
+				S: aws.String(resourceId),
+			},
+			"resource_type": {
+				S: aws.String(resourceType),
+			},
+		},
+	})
 
-	market, err := cg.CoinsMarket(vsCurrency, ids, order, perPage, page, true, []string{pcp.PCP24h})
-	if err != nil {
-		log.Fatal(err)
+	if result.Item == nil {
+		log.Fatalf("Can't find item: %s", result)
 	}
 
-	current := (*market)[0]
+	item := Item{}
+
+	_ = dynamodbattribute.UnmarshalMap(result.Item, &item)
 
 	dc := gg.NewContext(640, 440)
 
 	direction := DirectionUp
 
-	if current.PriceChangePercentage24h < 0.0 {
+	if item.PriceChangePercentage24h < 0.0 {
 		direction = DirectionDown
 	}
-
-	xValues := []float64{}
-	yValues := []float64{}
-
-	for i, l := range current.SparklineIn7d.Price {
-		xValues = append(xValues, float64(i))
-		yValues = append(yValues, l)
-	}
+	xValues, yValues := item.GetStarklineValues()
 
 	dc.DrawRectangle(0, 0, 640, 440)
 	g := gg.NewLinearGradient(0, 0, 640, 440)
-	g.AddColorStop(0, theme.bgColorA)
-	g.AddColorStop(1, theme.bgColorB)
+	g.AddColorStop(0, theme.bgColor[0])
+	g.AddColorStop(1, theme.bgColor[1])
 	dc.SetFillStyle(g)
 	dc.Fill()
 
@@ -207,11 +359,7 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 
 	dc.DrawImage(sparkline, 24, 231)
 
-	dc.SetColor(theme.timestampColor)
-
-	if err := dc.LoadFontFace("./fonts/Lato/Lato-Regular.ttf", 18); err != nil {
-		panic(err)
-	}
+	theme.timestamp.ApplyToContext(dc)
 
 	now := time.Now().UTC().Format(time.RFC1123)
 	nowW, nowH := dc.MeasureString(now)
@@ -221,45 +369,33 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	dc.DrawLine(253, 404, 253+363, 404)
 	dc.Stroke()
 
-	if err := dc.LoadFontFace("./fonts/Lato/Lato-BoldItalic.ttf", 32); err != nil {
-		panic(err)
-	}
+	theme.ticker.ApplyToContext(dc)
 
-	dc.SetColor(theme.tickerColor)
-
-	symbol := fmt.Sprintf("%s / %s", current.Symbol, vsCurrency)
+	symbol := fmt.Sprintf("%s / %s", item.Symbol, params.Quote)
 	symbol = strings.ToUpper(symbol)
 
 	_, symbolH := dc.MeasureString(symbol)
 	dc.DrawString(symbol, 116, 70+symbolH+(38-symbolH)/2)
 
-	if err := dc.LoadFontFace("./fonts/Lato/Lato-Regular.ttf", 18); err != nil {
-		panic(err)
-	}
+	theme.name.ApplyToContext(dc)
 
-	dc.SetColor(theme.nameColor)
-
-	name := current.Name
+	name := item.Name
 	_, nameH := dc.MeasureString(name)
 	dc.DrawString(name, 116, 108+nameH+(22-nameH)/2)
 
-	if err := dc.LoadFontFace("./fonts/Fira_Sans/FiraSans-Light.ttf", 34); err != nil {
-		panic(err)
-	}
+	theme.price.ApplyToContext(dc)
 
-	dc.SetColor(theme.priceColor)
-
-	lc := accounting.LocaleInfo[vsCurrency]
+	lc := accounting.LocaleInfo[params.Quote]
 	ac := accounting.Accounting{Symbol: lc.ComSymbol, Precision: lc.FractionLength, Thousand: lc.ThouSep, Decimal: lc.DecSep}
 
-	log.Printf("%.8f", current.CurrentPrice)
-	price := ac.FormatMoney(current.CurrentPrice)
+	log.Printf("%.8f", item.Price)
+	price := ac.FormatMoney(item.Price)
 	priceW, priceH := dc.MeasureString(price)
 	dc.DrawString(price, 24, 162+priceH+(38-priceH)/2)
 
 	dc.SetColor(direction.color)
 
-	percentChange := fmt.Sprintf(direction.percentChangePattern, current.PriceChangePercentage24h, "%")
+	percentChange := fmt.Sprintf(direction.percentChangePattern, item.PriceChangePercentage24h, "%")
 	percentChangeW, percentChangeH := dc.MeasureString(percentChange)
 	dc.DrawString(percentChange, 24+priceW+32, 162+percentChangeH+(38-percentChangeH)/2)
 
@@ -273,26 +409,8 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	dc.SetLineWidth(2)
 	dc.Stroke()
 
-	response, err := http.Get(current.Image)
-	if err != nil {
-		panic(err)
-	}
-	defer response.Body.Close()
-
-	currentLogo, _, _ := image.Decode(response.Body)
-	currentLogo = resize.Resize(60, 0, currentLogo, resize.NearestNeighbor)
-
-	dc.DrawImage(currentLogo, 24, 70)
-
-	f, err := os.Open(theme.logoPath)
-	if err != nil {
-		panic(err)
-	}
-	defer f.Close()
-
-	logo, _, _ := image.Decode(f)
-
-	dc.DrawImage(logo, 24, 392)
+	dc.DrawImage(*item.GetLogo(), 24, 70)
+	dc.DrawImage(*theme.GetLogo(), 24, 392)
 
 	buffer := bytes.NewBuffer([]byte{})
 	jpeg.Encode(buffer, dc.Image(), &jpeg.Options{Quality: 100})
@@ -308,5 +426,11 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 }
 
 func main() {
+	awsSession, _ := session.NewSession(&aws.Config{})
+	dynamodbClient = dynamodb.New(awsSession)
+
+	logos = make(map[string]*image.Image)
+	fonts = make(map[string]*truetype.Font)
+
 	lambda.Start(handler)
 }

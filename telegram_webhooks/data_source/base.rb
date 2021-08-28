@@ -103,6 +103,7 @@ module DataSource
           symbol: item['symbol'],
           id: item['id'],
           image: item['image'],
+          sparkline: item['sparkline_in_7d']['price'],
           valid_to: Time.now.to_i + 60
         }
       end

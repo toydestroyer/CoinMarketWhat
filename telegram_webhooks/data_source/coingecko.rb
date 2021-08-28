@@ -19,7 +19,7 @@ module DataSource
         res = RestClient.get(
           'https://api.coingecko.com/api/v3/coins/markets',
           {
-            params: { vs_currency: quote, ids: ids.join(','), order: 'market_cap_desc' }
+            params: { vs_currency: quote, ids: ids.join(','), order: 'market_cap_desc', sparkline: true }
           }
         )
 
@@ -40,7 +40,10 @@ module DataSource
             'name' => asset['name'],
             'symbol' => asset['symbol'],
             'id' => id,
-            'image' => asset['image']
+            'image' => asset['image'],
+            'sparkline_in_7d' => {
+              'price' => []
+            }
           }
         end
 

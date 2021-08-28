@@ -7,7 +7,7 @@ Globals:
     CodeUri: telegram_webhooks/
     Runtime: ruby2.7
     MemorySize: 128
-    Timeout: 3
+    Timeout: 10
     Environment:
       Variables:
         EVENTS_TOPIC: !Ref EventsTopic

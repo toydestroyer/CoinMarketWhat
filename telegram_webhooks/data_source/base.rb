@@ -103,6 +103,8 @@ module DataSource
           symbol: item['symbol'],
           id: item['id'],
           image: item['image'],
+          sparkline: item['sparkline_in_7d']['price'],
+          price_change_percentage_24h: item['price_change_percentage_24h'],
           valid_to: Time.now.to_i + 60
         }
       end

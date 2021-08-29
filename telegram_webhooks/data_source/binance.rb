@@ -29,7 +29,11 @@ module DataSource
             'symbol' => asset['symbol'],
             'quote' => quote,
             'name' => asset['name'],
-            'current_price' => price
+            'current_price' => price,
+            'sparkline_in_7d' => {
+              'price' => []
+            },
+            'price_change_percentage_24h' => 0.0
           }
         ]
       end
@@ -71,7 +75,11 @@ module DataSource
             'name' => asset['name'],
             'symbol' => asset['symbol'],
             'id' => id,
-            'image' => asset['image']
+            'image' => asset['image'],
+            'sparkline_in_7d' => {
+              'price' => []
+            },
+            'price_change_percentage_24h' => 0.0
           }
         end
       end

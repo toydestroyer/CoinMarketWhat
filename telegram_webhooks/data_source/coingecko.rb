@@ -27,24 +27,25 @@ module DataSource
       end
 
       def fetch_batch_prices(id:, quotes:)
-        asset = available_assets[id]
-
-        res = RestClient.get('https://api.coingecko.com/api/v3/simple/price',
-                             { params: { ids: id, vs_currencies: quotes.join(',') } })
-        result = JSON.parse(res)[id]
-
-        items = result.map do |quote, price|
+        res = RestClient.get(
+          "https://api.coingecko.com/api/v3/coins/#{id}",
           {
-            'current_price' => price,
-            'quote' => quote.upcase,
-            'name' => asset['name'],
-            'symbol' => asset['symbol'],
-            'id' => id,
-            'image' => asset['image'],
-            'sparkline_in_7d' => {
-              'price' => []
+            params: {
+              sparkline: true,
+              localization: false,
+              developer_data: false,
+              community_data: false,
+              tickers: false
             }
           }
+        )
+
+        res = JSON.parse(res.body)
+
+        items = []
+
+        quotes.each do |quote|
+          items << build_cache_item(res, quote)
         end
 
         cache_prices(items)
@@ -63,6 +64,21 @@ module DataSource
 
           result.map(&:upcase)
         end
+      end
+
+      private
+
+      def build_cache_item(res, quote)
+        {
+          'current_price' => res['market_data']['current_price'][quote.downcase],
+          'quote' => quote,
+          'name' => res['name'],
+          'symbol' => res['symbol'].upcase,
+          'id' => res['id'],
+          'image' => res['image']['large'],
+          'sparkline_in_7d' => res['market_data']['sparkline_7d'],
+          'price_change_percentage_24h' => res['market_data']['price_change_percentage_24h_in_currency'][quote.downcase]
+        }
       end
     end
   end

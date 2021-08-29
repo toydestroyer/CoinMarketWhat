@@ -32,7 +32,8 @@ module DataSource
             'current_price' => price,
             'sparkline_in_7d' => {
               'price' => []
-            }
+            },
+            'price_change_percentage_24h' => 0.0
           }
         ]
       end
@@ -77,7 +78,8 @@ module DataSource
             'image' => asset['image'],
             'sparkline_in_7d' => {
               'price' => []
-            }
+            },
+            'price_change_percentage_24h' => 0.0
           }
         end
       end

@@ -58,17 +58,17 @@ Resources:
         WriteCapacityUnits: 5
       AttributeDefinitions:
         -
-          AttributeName: resource_id
+          AttributeName: resource_type
           AttributeType: S
         -
-          AttributeName: resource_type
+          AttributeName: resource_id
           AttributeType: S
       KeySchema:
         -
-          AttributeName: resource_id
+          AttributeName: resource_type
           KeyType: HASH
         -
-          AttributeName: resource_type
+          AttributeName: resource_id
           KeyType: RANGE
   EventsTopic:
     Type: AWS::SNS::Topic

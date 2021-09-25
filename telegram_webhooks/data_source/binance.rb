@@ -10,30 +10,38 @@ module DataSource
       def fetch_prices(ids:, quote:)
         id = ids.first
         asset = CoinGecko.available_assets[id]
+        symbol = "#{asset['symbol']}#{quote}"
         res = RestClient.get(
-          'https://api.binance.com/api/v3/ticker/price',
+          'https://api.binance.com/api/v3/ticker/24hr',
           {
-            params: { symbol: "#{asset['symbol']}#{quote}" }
+            params: { symbol: symbol }
           }
         )
 
-        render_prices(body: JSON.parse(res.body), id: id, asset: asset, quote: quote)
+        item = JSON.parse(res.body)
+
+        ct = Time.now
+        klines_start_time = (Time.new(ct.year, ct.month, ct.day, ct.hour) - 604_800).to_i * 1000
+        klines_params = { symbol: symbol, interval: '1h', startTime: klines_start_time}
+        res = RestClient.get('https://api.binance.com/api/v3/klines', params: klines_params)
+        item['sparkline'] = JSON.parse(res).map { |kline| kline[2].to_f }
+
+        render_prices(body: item, id: id, asset: asset, quote: quote)
       end
 
       def render_prices(body:, id:, asset:, quote:)
-        price = body['price'].to_f
-
         [
           {
             'id' => id,
             'symbol' => asset['symbol'],
             'quote' => quote,
             'name' => asset['name'],
-            'current_price' => price,
+            'image' => asset['image'],
+            'current_price' => body['lastPrice'].to_f,
             'sparkline_in_7d' => {
-              'price' => []
+              'price' => body['sparkline']
             },
-            'price_change_percentage_24h' => 0.0
+            'price_change_percentage_24h' => body['priceChangePercent'].to_f
           }
         ]
       end
@@ -50,7 +58,7 @@ module DataSource
           item = JSON.parse(res)
 
           ct = Time.now
-          klines_start_time = (Time.new(ct.year, ct.month, ct.day, ct.hour) - 604800).to_i * 1000
+          klines_start_time = (Time.new(ct.year, ct.month, ct.day, ct.hour) - 604_800).to_i * 1000
           klines_params = { symbol: symbol, interval: '1h', startTime: klines_start_time}
           res = RestClient.get('https://api.binance.com/api/v3/klines', params: klines_params)
           item['sparkline'] = JSON.parse(res).map { |kline| kline[2].to_f }

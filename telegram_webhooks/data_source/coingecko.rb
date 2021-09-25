@@ -16,6 +16,21 @@ module DataSource
       # rubocop:enable Lint/UnusedMethodArgument
 
       def fetch_prices(ids:, quote:)
+        sparklines = {}
+
+        # NOTE: /coins/markets endpoint always returns sparkline in USD
+        # so in order to get more accurate data we should call /coins/{id}/market_chart for any non-USD pair
+        if quote != 'USD'
+          ids.each do |id|
+            res = RestClient.get(
+              "https://api.coingecko.com/api/v3/coins/#{id}/market_chart",
+              params: { vs_currency: quote, days: 7, interval: 'hourly' }
+            )
+
+            sparklines[id] = JSON.parse(res.body)['prices'].map { |item| item[1] }
+          end
+        end
+
         res = RestClient.get(
           'https://api.coingecko.com/api/v3/coins/markets',
           {
@@ -23,10 +38,24 @@ module DataSource
           }
         )
 
-        JSON.parse(res.body).map { |item| item.merge('quote' => quote) }
+        JSON.parse(res.body).map do |item|
+          item['sparkline_in_7d']['price'] = sparklines[item['id']] if sparklines.key?(item['id'])
+          item.merge('quote' => quote)
+        end
       end
 
       def fetch_batch_prices(id:, quotes:)
+        sparklines = {}
+        # TODO: Refactor with threads
+        quotes.each do |quote|
+          res = RestClient.get(
+            "https://api.coingecko.com/api/v3/coins/#{id}/market_chart",
+            params: { vs_currency: quote, days: 7, interval: 'hourly' }
+          )
+
+          sparklines[quote] = JSON.parse(res.body)['prices'].map { |item| item[1] }
+        end
+
         res = RestClient.get(
           "https://api.coingecko.com/api/v3/coins/#{id}",
           {
@@ -45,7 +74,7 @@ module DataSource
         items = []
 
         quotes.each do |quote|
-          items << build_cache_item(res, quote)
+          items << build_cache_item(res, quote, sparklines[quote])
         end
 
         cache_prices(items)
@@ -68,7 +97,7 @@ module DataSource
 
       private
 
-      def build_cache_item(res, quote)
+      def build_cache_item(res, quote, sparkline)
         {
           'current_price' => res['market_data']['current_price'][quote.downcase],
           'quote' => quote,
@@ -76,7 +105,7 @@ module DataSource
           'symbol' => res['symbol'].upcase,
           'id' => res['id'],
           'image' => res['image']['large'],
-          'sparkline_in_7d' => res['market_data']['sparkline_7d'],
+          'sparkline_in_7d' => sparkline ? { 'price' => sparkline } : res['market_data']['sparkline_7d'],
           'price_change_percentage_24h' => res['market_data']['price_change_percentage_24h_in_currency'][quote.downcase]
         }
       end

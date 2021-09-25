@@ -43,9 +43,19 @@ module DataSource
         symbol = asset['symbol']
         symbols = quotes.map { |quote| "#{symbol}#{quote}" }
 
-        res = RestClient.get('https://api.binance.com/api/v3/ticker/price')
-        result = JSON.parse(res)
-        result = result.select { |item| symbols.include?(item['symbol']) }
+        result = []
+        # TODO: Threads
+        symbols.each do |symbol|
+          res = RestClient.get('https://api.binance.com/api/v3/ticker/24hr', params: { symbol: symbol })
+          item = JSON.parse(res)
+
+          ct = Time.now
+          klines_start_time = (Time.new(ct.year, ct.month, ct.day, ct.hour) - 604800).to_i * 1000
+          klines_params = { symbol: symbol, interval: '1h', startTime: klines_start_time}
+          res = RestClient.get('https://api.binance.com/api/v3/klines', params: klines_params)
+          item['sparkline'] = JSON.parse(res).map { |kline| kline[2].to_f }
+          result << item
+        end
 
         items = build_price_items(result: result, id: id, asset: asset)
 
@@ -70,16 +80,16 @@ module DataSource
       def build_price_items(result:, id:, asset:)
         result.map do |item|
           {
-            'current_price' => item['price'].to_f,
+            'current_price' => item['lastPrice'].to_f,
             'quote' => item['symbol'][asset['symbol'].size...],
             'name' => asset['name'],
             'symbol' => asset['symbol'],
             'id' => id,
             'image' => asset['image'],
             'sparkline_in_7d' => {
-              'price' => []
+              'price' => item['sparkline']
             },
-            'price_change_percentage_24h' => 0.0
+            'price_change_percentage_24h' => item['priceChangePercent'].to_f
           }
         end
       end

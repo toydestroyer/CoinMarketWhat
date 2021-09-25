@@ -18,7 +18,6 @@ Globals:
         TELEGRAM_BOT_API_TOKEN: !GetAtt TelegramBotApiTokenParameter.Value
         TELEGRAM_ADMIN_CHAT_ID: !GetAtt TelegramAdminChatIdParameter.Value
         DONATION_ADDRESS: !GetAtt DonationAddressParameter.Value
-        # GENERATE_IMAGES_API: !Ref ImagesApi
 
 Resources:
   TelegramBotApiTokenParameter:
@@ -110,6 +109,9 @@ Resources:
     Properties:
       Handler: lambda.Lambda::Webhook.call
       MemorySize: 256
+      Environment:
+        Variables:
+          GENERATE_IMAGES_API: !Ref ImagesApi
       Policies:
         - AWSLambdaBasicExecutionRole
         - Version: "2012-10-17"

@@ -22,12 +22,7 @@ module DataSource
         # so in order to get more accurate data we should call /coins/{id}/market_chart for any non-USD pair
         if quote != 'USD'
           ids.each do |id|
-            res = RestClient.get(
-              "https://api.coingecko.com/api/v3/coins/#{id}/market_chart",
-              params: { vs_currency: quote, days: 7, interval: 'hourly' }
-            )
-
-            sparklines[id] = JSON.parse(res.body)['prices'].map { |item| item[1] }
+            sparklines[id] = sparkline(id: id, quote: quote)
           end
         end
 
@@ -48,12 +43,7 @@ module DataSource
         sparklines = {}
         # TODO: Refactor with threads
         quotes.each do |quote|
-          res = RestClient.get(
-            "https://api.coingecko.com/api/v3/coins/#{id}/market_chart",
-            params: { vs_currency: quote, days: 7, interval: 'hourly' }
-          )
-
-          sparklines[quote] = JSON.parse(res.body)['prices'].map { |item| item[1] }
+          sparklines[quote] = sparkline(id: id, quote: quote)
         end
 
         res = RestClient.get(
@@ -70,12 +60,7 @@ module DataSource
         )
 
         res = JSON.parse(res.body)
-
-        items = []
-
-        quotes.each do |quote|
-          items << build_cache_item(res, quote, sparklines[quote])
-        end
+        items = quotes.map { |quote| build_cache_item(res, quote, sparklines[quote]) }
 
         cache_prices(items)
       end
@@ -108,6 +93,15 @@ module DataSource
           'sparkline_in_7d' => sparkline ? { 'price' => sparkline } : res['market_data']['sparkline_7d'],
           'price_change_percentage_24h' => res['market_data']['price_change_percentage_24h_in_currency'][quote.downcase]
         }
+      end
+
+      def sparkline(id:, quote:)
+        res = RestClient.get(
+          "https://api.coingecko.com/api/v3/coins/#{id}/market_chart",
+          params: { vs_currency: quote, days: 7, interval: 'hourly' }
+        )
+
+        JSON.parse(res.body)['prices'].map { |item| item[1] }
       end
     end
   end

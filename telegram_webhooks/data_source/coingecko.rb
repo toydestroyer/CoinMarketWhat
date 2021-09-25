@@ -16,6 +16,16 @@ module DataSource
       # rubocop:enable Lint/UnusedMethodArgument
 
       def fetch_prices(ids:, quote:)
+        sparklines = {}
+
+        # NOTE: /coins/markets endpoint always returns sparkline in USD
+        # so in order to get more accurate data we should call /coins/{id}/market_chart for any non-USD pair
+        if quote != 'USD'
+          ids.each do |id|
+            sparklines[id] = sparkline(id: id, quote: quote)
+          end
+        end
+
         res = RestClient.get(
           'https://api.coingecko.com/api/v3/coins/markets',
           {
@@ -23,10 +33,19 @@ module DataSource
           }
         )
 
-        JSON.parse(res.body).map { |item| item.merge('quote' => quote) }
+        JSON.parse(res.body).map do |item|
+          item['sparkline_in_7d']['price'] = sparklines[item['id']] if sparklines.key?(item['id'])
+          item.merge('quote' => quote)
+        end
       end
 
       def fetch_batch_prices(id:, quotes:)
+        sparklines = {}
+        # TODO: Refactor with threads
+        quotes.each do |quote|
+          sparklines[quote] = sparkline(id: id, quote: quote)
+        end
+
         res = RestClient.get(
           "https://api.coingecko.com/api/v3/coins/#{id}",
           {
@@ -41,12 +60,7 @@ module DataSource
         )
 
         res = JSON.parse(res.body)
-
-        items = []
-
-        quotes.each do |quote|
-          items << build_cache_item(res, quote)
-        end
+        items = quotes.map { |quote| build_cache_item(res, quote, sparklines[quote]) }
 
         cache_prices(items)
       end
@@ -68,7 +82,7 @@ module DataSource
 
       private
 
-      def build_cache_item(res, quote)
+      def build_cache_item(res, quote, sparkline)
         {
           'current_price' => res['market_data']['current_price'][quote.downcase],
           'quote' => quote,
@@ -76,9 +90,18 @@ module DataSource
           'symbol' => res['symbol'].upcase,
           'id' => res['id'],
           'image' => res['image']['large'],
-          'sparkline_in_7d' => res['market_data']['sparkline_7d'],
+          'sparkline_in_7d' => sparkline ? { 'price' => sparkline } : res['market_data']['sparkline_7d'],
           'price_change_percentage_24h' => res['market_data']['price_change_percentage_24h_in_currency'][quote.downcase]
         }
+      end
+
+      def sparkline(id:, quote:)
+        res = RestClient.get(
+          "https://api.coingecko.com/api/v3/coins/#{id}/market_chart",
+          params: { vs_currency: quote, days: 7, interval: 'hourly' }
+        )
+
+        JSON.parse(res.body)['prices'].map { |item| item[1] }
       end
     end
   end

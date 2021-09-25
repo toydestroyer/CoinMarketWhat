@@ -7,7 +7,7 @@ module Handler
     def initialize(query)
       super
 
-      @chat_type = query['chat_type']
+      @chat_type = query['chat_type'] || 'private'
       @id = query['id']
       @query = query['query']
     end
@@ -24,9 +24,9 @@ module Handler
         cache_time: 60
       }
 
-      return result if %w[private sender].include?(chat_type) || user.registered?
+      result = result.merge(switch_pm_parameter: '0', switch_pm_text: 'How it works?') if user.unregistered?
 
-      result.merge(switch_pm_parameter: '0', switch_pm_text: 'How it works?')
+      result
     end
 
     private

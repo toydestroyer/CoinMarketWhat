@@ -35,6 +35,10 @@ module Telegram
       end
     end
 
+    def unregistered?
+      @unregistered ||= !registered?
+    end
+
     private
 
     attr_reader :params

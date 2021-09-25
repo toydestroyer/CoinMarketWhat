@@ -2,13 +2,14 @@
 
 module Handler
   class Message < Base
-    attr_reader :id, :chat, :text, :entities, :admin_chat_id
+    attr_reader :id, :chat, :from, :text, :entities, :admin_chat_id
 
     def initialize(query)
       super
 
       @id = query['message_id']
       @chat = query['chat']
+      @from = query['from']
       @text = query['text']
       @entities = query['entities']
       @admin_chat_id = ENV['TELEGRAM_ADMIN_CHAT_ID']
@@ -62,7 +63,10 @@ module Handler
     end
 
     def should_be_forwarded?
-      !start_from_command? && chat['id'] != admin_chat_id.to_i
+      !start_from_command? &&
+        chat['type'] == 'private' &&
+        chat['id'] == from['id'] &&
+        chat['id'] != admin_chat_id.to_i
     end
   end
 end

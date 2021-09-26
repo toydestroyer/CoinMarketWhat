@@ -20,29 +20,45 @@ Globals:
         TELEGRAM_ADMIN_CHAT_ID: !GetAtt TelegramAdminChatIdParameter.Value
         DONATION_ADDRESS: !GetAtt DonationAddressParameter.Value
 
+Parameters:
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - staging
+
 Resources:
   TelegramBotApiTokenParameter:
     Type: AWS::SSM::Parameter
     Properties:
-      Name: '/CoinMarketWhat/config/telegram_bot_api_token'
+      Name: !Sub
+        - /CoinMarketWhat/${Environment}/config/telegram_bot_api_token
+        - { Environment: !Ref Environment }
       Type: String
       Value: REPLACE-ME-IN-AWS-CONSOLE
   TelegramAdminChatIdParameter:
     Type: AWS::SSM::Parameter
     Properties:
-      Name: '/CoinMarketWhat/config/telegram_admin_chat_id'
+      Name: !Sub
+        - /CoinMarketWhat/${Environment}/config/telegram_admin_chat_id
+        - { Environment: !Ref Environment }
       Type: String
       Value: REPLACE-ME-IN-AWS-CONSOLE
   SentryDsnParameter:
     Type: AWS::SSM::Parameter
     Properties:
-      Name: '/CoinMarketWhat/config/sentry_dsn'
+      Name: !Sub
+        - /CoinMarketWhat/${Environment}/config/sentry_dsn
+        - { Environment: !Ref Environment }
       Type: String
       Value: REPLACE-ME-IN-AWS-CONSOLE
   DonationAddressParameter:
     Type: AWS::SSM::Parameter
     Properties:
-      Name: '/CoinMarketWhat/config/donation_address'
+      Name: !Sub
+        - /CoinMarketWhat/${Environment}/config/donation_address
+        - { Environment: !Ref Environment }
       Type: String
       Value: '{"coin": "address"}'
   DynamoDBTable:
@@ -73,8 +89,6 @@ Resources:
     Type: AWS::SNS::Topic
   PreCacheQueue:
     Type: AWS::SQS::Queue
-    Properties:
-      QueueName: CoinMarketWhatPreCacheQueue
   LogsBucket:
     Type: AWS::S3::Bucket
     Properties:

@@ -314,7 +314,7 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 
 	_ = json.Unmarshal(decoded_params, &params)
 
-	tableName := "CoinMarketWhatDB"
+	tableName := os.Getenv("DYNAMODB_TABLE_NAME")
 	resourceId := fmt.Sprintf("%s:%s:%s", params.Base, params.Source, params.Quote)
 	log.Printf("ResourceId: %s", resourceId)
 	resourceType := "price"

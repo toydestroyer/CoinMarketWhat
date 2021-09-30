@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Command
-  class HowTo < Base
+  class Help < Base
     def message
       {
         # This file_id is not confidential and could be safely stored in the repo

@@ -9,6 +9,7 @@ gem 'aws-sdk-s3'
 gem 'aws-sdk-sns'
 gem 'aws-sdk-sqs'
 
+gem 'activesupport'
 gem 'money'
 gem 'rest-client'
 gem 'sentry-ruby'

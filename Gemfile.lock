@@ -1,6 +1,12 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    activesupport (6.1.4.1)
+      concurrent-ruby (~> 1.0, >= 1.0.2)
+      i18n (>= 1.6, < 2)
+      minitest (>= 5.1)
+      tzinfo (~> 2.0)
+      zeitwerk (~> 2.3)
     addressable (2.8.0)
       public_suffix (>= 2.0.2, < 5.0)
     ast (2.4.2)
@@ -64,6 +70,7 @@ GEM
     mime-types (3.3.1)
       mime-types-data (~> 3.2015)
     mime-types-data (3.2021.0901)
+    minitest (5.14.4)
     money (6.16.0)
       i18n (>= 0.6.4, <= 2)
     multipart-post (2.1.1)
@@ -118,6 +125,8 @@ GEM
     sentry-ruby-core (4.7.3)
       concurrent-ruby
       faraday
+    tzinfo (2.0.4)
+      concurrent-ruby (~> 1.0)
     unf (0.1.4)
       unf_ext
     unf_ext (0.0.8)
@@ -132,6 +141,7 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
+  activesupport
   aws-sdk-dynamodb
   aws-sdk-s3
   aws-sdk-sns

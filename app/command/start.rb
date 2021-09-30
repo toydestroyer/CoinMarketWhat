@@ -34,7 +34,7 @@ module Command
 
         Because this bot is mainly focused on inline features, you can't do much in this chat, but here's the list of commands available:
 
-        /howto — show "how to" gif
+        /help — show "how to" gif
         /about — show this message again
         /donate — I think you know what this command does 😉
 

@@ -4,7 +4,7 @@ Description: CoinMarketWhat
 
 Globals:
   Function:
-    CodeUri: telegram_webhooks/
+    CodeUri: app/
     Runtime: ruby2.7
     MemorySize: 128
     Timeout: 10

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative '../telegram_webhooks/lambda'
+require_relative '../app/lambda'
 require 'webmock/rspec'
 
 WebMock.disable_net_connect!(allow: 'localstack:4566', allow_localhost: true)

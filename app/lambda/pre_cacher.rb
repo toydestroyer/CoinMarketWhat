@@ -6,15 +6,26 @@ module Lambda
       puts "Records: #{event['Records'].size}"
 
       event['Records'].each do |record|
-        record = JSON.parse(record['body'])
+        event_name = record['Sns']['MessageAttributes']['event_name']['Value']
 
-        record.each do |id, data_sources|
-          data_sources.each do |slug, quotes|
-            data_source = DATA_SOURCES_MAP[slug]
-
-            data_source.fetch_batch_prices(id: id, quotes: quotes)
-          end
+        case event_name
+        when 'callback_query'
+          cache_callback_query(record['Sns']['Message'])
+        when 'chosen_inline_result'
+          # TODO
         end
+      end
+    end
+
+    private
+
+    def cache_callback_query(message)
+      query = JSON.parse(message)
+      state = CallbackData.parse(query['callback_query']['data'])
+
+      state.visible.each do |slug, quotes|
+        data_source = DATA_SOURCES_MAP[slug]
+        data_source.fetch_batch_prices(id: state.base, quotes: quotes)
       end
     end
   end

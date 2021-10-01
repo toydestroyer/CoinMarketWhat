@@ -14,7 +14,6 @@ Globals:
         EVENTS_TOPIC: !Ref EventsTopic
         CACHE_BUCKET: !Ref CacheBucket
         LOGS_BUCKET: !Ref LogsBucket
-        PRE_CACHE_QUEUE: !Ref PreCacheQueue
         SENTRY_DSN: !GetAtt SentryDsnParameter.Value
         TELEGRAM_BOT_API_TOKEN: !GetAtt TelegramBotApiTokenParameter.Value
         TELEGRAM_ADMIN_CHAT_ID: !GetAtt TelegramAdminChatIdParameter.Value
@@ -87,8 +86,6 @@ Resources:
           KeyType: RANGE
   EventsTopic:
     Type: AWS::SNS::Topic
-  PreCacheQueue:
-    Type: AWS::SQS::Queue
   LogsBucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -135,11 +132,6 @@ Resources:
                 - dynamodb:*
               Resource:
                 - !GetAtt DynamoDBTable.Arn
-            - Effect: Allow
-              Action:
-                - sqs:*
-              Resource:
-                - !GetAtt PreCacheQueue.Arn
             - Effect: Allow
               Action: sns:Publish
               Resource: !Ref EventsTopic
@@ -196,10 +188,14 @@ Resources:
                 - ${BucketArn}/*
                 - { BucketArn: !GetAtt CacheBucket.Arn }
       Events:
-        SQSLogsEvent:
-          Type: SQS
+        PreCacheEvents:
+          Type: SNS
           Properties:
-            Queue: !GetAtt PreCacheQueue.Arn
+            Topic: !Ref EventsTopic
+            FilterPolicy:
+              event_name:
+                - callback_query
+                - chosen_inline_result
   CacheFunction:
     Type: AWS::Serverless::Function
     Properties:

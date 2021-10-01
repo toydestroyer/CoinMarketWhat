@@ -4,14 +4,14 @@ module Handler
   class Message < Base
     attr_reader :id, :chat, :from, :text, :entities, :admin_chat_id
 
-    def initialize(query)
+    def initialize(payload)
       super
 
-      @id = query['message_id']
-      @chat = query['chat']
-      @from = query['from']
-      @text = query['text']
-      @entities = query['entities']
+      @id = payload['message_id']
+      @chat = payload['chat']
+      @from = payload['from']
+      @text = payload['text']
+      @entities = payload['entities']
       @admin_chat_id = ENV['TELEGRAM_ADMIN_CHAT_ID']
 
       forward_message if should_be_forwarded?

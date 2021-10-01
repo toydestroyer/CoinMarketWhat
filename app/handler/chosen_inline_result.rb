@@ -4,14 +4,14 @@ module Handler
   class ChosenInlineResult < Base
     attr_reader :inline_message_id, :result_id
 
-    def initialize(query)
+    def initialize(payload)
       super
 
       Lambda.dynamodb.put_item(
         table_name: ENV['DYNAMODB_TABLE_NAME'],
         item: inline_query_result.merge(
           resource_type: 'telegram/inline_message',
-          resource_id: query['inline_message_id'],
+          resource_id: payload['inline_message_id'],
           user_id: user.id,
           created_at: Time.current.to_i,
           updated_at: Time.current.to_i
@@ -28,7 +28,7 @@ module Handler
     def inline_query_result
       result = Lambda.dynamodb.get_item(
         table_name: ENV['DYNAMODB_TABLE_NAME'],
-        key: { resource_type: 'telegram/inline_query_result', resource_id: query['result_id'] }
+        key: { resource_type: 'telegram/inline_query_result', resource_id: payload['result_id'] }
       ).item
 
       return {} unless result

@@ -2,14 +2,14 @@
 
 module Handler
   class InlineQuery < Base
-    attr_reader :chat_type, :id
+    attr_reader :chat_type, :id, :query
 
-    def initialize(query)
+    def initialize(payload)
       super
 
-      @chat_type = query['chat_type'] || 'secret'
-      @id = query['id']
-      @query = query['query']
+      @chat_type = payload['chat_type'] || 'secret'
+      @id = payload['id']
+      @query = payload['query']
     end
 
     def method_name

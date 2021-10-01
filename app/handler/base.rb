@@ -2,11 +2,11 @@
 
 module Handler
   class Base
-    attr_reader :query, :user
+    attr_reader :payload, :user
 
-    def initialize(query)
-      @query = query
-      @user = Telegram::User.new(query['from'])
+    def initialize(payload)
+      @payload = payload
+      @user = Telegram::User.new(payload['from'])
     end
 
     def process

@@ -4,11 +4,11 @@ module Handler
   class CallbackQuery < Base
     attr_reader :chat_instance, :state, :price
 
-    def initialize(query)
+    def initialize(payload)
       super
 
-      @chat_instance = BigDecimal(query['chat_instance'])
-      @state = CallbackData.parse(query['data'])
+      @chat_instance = BigDecimal(payload['chat_instance'])
+      @state = CallbackData.parse(payload['data'])
       @price = render_price(amount: symbol['current_price'], quote: state.quote)
     end
 
@@ -19,7 +19,7 @@ module Handler
     def params
       {
         text: "#{title} — #{price}",
-        inline_message_id: query['inline_message_id'],
+        inline_message_id: payload['inline_message_id'],
         reply_markup: ReplyMarkup.new(state: state).render.to_json
       }
     end

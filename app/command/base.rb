@@ -2,13 +2,12 @@
 
 module Command
   class Base
-    attr_reader :command, :user, :chat, :token
+    attr_reader :command, :user, :chat
 
     def initialize(command:, user:, chat:)
       @command = command
       @user = user
       @chat = chat
-      @token = ENV['TELEGRAM_BOT_API_TOKEN']
     end
 
     def message
@@ -22,7 +21,7 @@ module Command
     def process
       params = message.merge(chat_id: chat['id'])
 
-      puts RestClient.post("https://api.telegram.org/bot#{token}/#{method_name}", params)
+      puts RestClient.post("https://api.telegram.org/bot#{ENV['TELEGRAM_BOT_API_TOKEN']}/#{method_name}", params)
     end
   end
 end

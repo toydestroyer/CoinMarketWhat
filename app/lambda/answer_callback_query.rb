@@ -4,12 +4,6 @@ module Lambda
   class AnswerCallbackQuery < Base
     IGNORED_DESCRIPTION = 'Bad Request: query is too old and response timeout expired or query ID is invalid'
 
-    def initialize(event:)
-      super
-
-      @token = ENV['TELEGRAM_BOT_API_TOKEN']
-    end
-
     def process
       puts "Records: #{event['Records'].size}"
 
@@ -21,11 +15,9 @@ module Lambda
 
     private
 
-    attr_reader :token
-
     def answer_callback_query(id)
       puts RestClient.post(
-        "https://api.telegram.org/bot#{token}/answerCallbackQuery",
+        "https://api.telegram.org/bot#{ENV['TELEGRAM_BOT_API_TOKEN']}/answerCallbackQuery",
         callback_query_id: id
       )
     rescue RestClient::ExceptionWithResponse => e

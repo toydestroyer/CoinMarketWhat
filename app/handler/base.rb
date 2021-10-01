@@ -2,16 +2,15 @@
 
 module Handler
   class Base
-    attr_reader :query, :token, :user
+    attr_reader :query, :user
 
     def initialize(query)
       @query = query
       @user = Telegram::User.new(query['from'])
-      @token = ENV['TELEGRAM_BOT_API_TOKEN']
     end
 
     def process
-      puts RestClient.post("https://api.telegram.org/bot#{token}/#{method_name}", params)
+      puts RestClient.post("https://api.telegram.org/bot#{ENV['TELEGRAM_BOT_API_TOKEN']}/#{method_name}", params)
     end
 
     def respond

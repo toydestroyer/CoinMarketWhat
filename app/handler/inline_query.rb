@@ -7,6 +7,9 @@ module Handler
     def initialize(payload)
       super
 
+      # NOTE: If chat_type is absent then the query is most likely from a secret chat or third-party client,
+      # either way, we'll treat it as secret. I.e. no buttons and stuff.
+      # https://core.telegram.org/bots/api#inlinequery
       @chat_type = payload['chat_type'] || 'secret'
       @id = payload['id']
       @query = payload['query']

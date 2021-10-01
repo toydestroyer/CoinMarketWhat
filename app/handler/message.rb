@@ -12,7 +12,7 @@ module Handler
       @from = payload['from']
       @text = payload['text']
       @entities = payload['entities']
-      @admin_chat_id = ENV['TELEGRAM_ADMIN_CHAT_ID']
+      @admin_chat_id = ENV['TELEGRAM_ADMIN_CHAT_ID'].to_i
 
       forward_message if should_be_forwarded?
       process_commands if bot_commands.any?
@@ -66,7 +66,7 @@ module Handler
       !start_from_command? &&
         chat['type'] == 'private' &&
         chat['id'] == from['id'] &&
-        chat['id'] != admin_chat_id.to_i
+        chat['id'] != admin_chat_id
     end
   end
 end

@@ -20,7 +20,7 @@ module Handler
       {
         text: "#{title} — #{price}",
         inline_message_id: query['inline_message_id'],
-        reply_markup: build_reply_markup(state: state, try_button: chat_instance.negative?).to_json
+        reply_markup: ReplyMarkup.new(state: state).render.to_json
       }
     end
 

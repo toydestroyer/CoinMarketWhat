@@ -1,5 +1,5 @@
 name: rubocop
-on: push
+on: [pull_request]
 jobs:
   rubocop:
     name: runner / rubocop

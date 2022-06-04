@@ -200,7 +200,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: lambda.Lambda::Cache.call
-      MemorySize: 256
+      MemorySize: 512
       Timeout: 300
       Policies:
         - AWSLambdaBasicExecutionRole

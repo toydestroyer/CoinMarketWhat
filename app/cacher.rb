@@ -33,6 +33,13 @@ class Cacher
       body.each { |item| populate_result(item) }
 
       page += 1
+    rescue RestClient::ExceptionWithResponse => e
+      if e.response.code == 429
+        sleep e.response.headers['Retry-After'].to_i
+        next
+      end
+
+      raise e
     end
   end
 
@@ -48,6 +55,13 @@ class Cacher
       tickers.each { |item| populate_tickers(item: item, exchange: exchange) }
 
       page += 1
+    rescue RestClient::ExceptionWithResponse => e
+      if e.response.code == 429
+        sleep e.response.headers['Retry-After'].to_i
+        next
+      end
+
+      raise e
     end
   end
 

@@ -95,6 +95,8 @@ GEM
       rubocop-ast (>= 0.4.0)
     rubocop-rspec (2.11.1)
       rubocop (~> 1.19)
+    rubocop-thread_safety (0.4.4)
+      rubocop (>= 0.53.0)
     ruby-progressbar (1.11.0)
     sentry-ruby (5.3.1)
       concurrent-ruby (~> 1.0, >= 1.0.2)
@@ -129,6 +131,7 @@ DEPENDENCIES
   rubocop
   rubocop-performance
   rubocop-rspec
+  rubocop-thread_safety
   sentry-ruby
   webmock
   zeitwerk

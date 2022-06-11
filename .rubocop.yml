@@ -1,6 +1,7 @@
 require:
   - rubocop-rspec
   - rubocop-performance
+  - rubocop-thread_safety
 
 AllCops:
   NewCops: enable

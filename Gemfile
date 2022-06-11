@@ -18,6 +18,7 @@ gem 'zeitwerk'
 gem 'rubocop'
 gem 'rubocop-performance'
 gem 'rubocop-rspec'
+gem 'rubocop-thread_safety'
 
 group :test do
   gem 'rspec'

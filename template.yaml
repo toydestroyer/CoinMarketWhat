@@ -120,6 +120,8 @@ Resources:
     Properties:
       Handler: lambda.Lambda::Webhook.call
       MemorySize: 256
+      Architectures:
+        - arm64
       Environment:
         Variables:
           GENERATE_IMAGES_API: !Ref ImagesApi
@@ -152,6 +154,8 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: lambda.Lambda::Logger.call
+      Architectures:
+        - arm64
       Policies:
         - AWSLambdaBasicExecutionRole
         - Version: "2012-10-17"
@@ -171,6 +175,8 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: lambda.Lambda::PreCacher.call
+      Architectures:
+        - arm64
       Timeout: 10
       Policies:
         - AWSLambdaBasicExecutionRole
@@ -202,6 +208,8 @@ Resources:
       Handler: lambda.Lambda::Cache.call
       MemorySize: 512
       Timeout: 300
+      Architectures:
+        - arm64
       Policies:
         - AWSLambdaBasicExecutionRole
         - Version: "2012-10-17"
@@ -221,6 +229,8 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: lambda.Lambda::AnswerCallbackQuery.call
+      Architectures:
+        - arm64
       Policies:
         - AWSLambdaBasicExecutionRole
       Events:
@@ -238,6 +248,8 @@ Resources:
       Handler: generate-images
       Runtime: go1.x
       MemorySize: 2048
+      Architectures:
+        - x86_64
       Policies:
         - AWSLambdaBasicExecutionRole
         - Version: "2012-10-17"

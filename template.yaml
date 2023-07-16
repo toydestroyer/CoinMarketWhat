@@ -5,7 +5,7 @@ Description: CoinMarketWhat
 Globals:
   Function:
     CodeUri: app/
-    Runtime: ruby2.7
+    Runtime: ruby3.2
     MemorySize: 128
     Timeout: 10
     Environment:

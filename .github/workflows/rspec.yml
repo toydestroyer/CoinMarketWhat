@@ -15,7 +15,7 @@ jobs:
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 2.7.5
+          ruby-version: 3.2.2
           bundler-cache: true
       - name: Wait for localstack to start
         # TODO: Find a better way, like: https://github.com/localstack/localstack/issues/732#issuecomment-799088216

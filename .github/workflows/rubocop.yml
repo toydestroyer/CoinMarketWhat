@@ -12,3 +12,5 @@ jobs:
           bundler-cache: true
       - name: rubocop
         uses: reviewdog/action-rubocop@v2
+        with:
+          rubocop_extensions: rubocop-rspec:gemfile rubocop-performance:gemfile rubocop-thread_safety:gemfile

@@ -9,10 +9,10 @@ updates:
     groups:
       aws-sdk:
         patterns:
-        - "aws-sdk-*"
+          - "aws-sdk-*"
       rubocop:
         patterns:
-        - "rubocop*"
+          - "rubocop*"
 
   - package-ecosystem: "gomod"
     directory: "/generate_images"

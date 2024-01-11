@@ -14,14 +14,14 @@ module DataSource
         res = RestClient.get(
           'https://api.binance.com/api/v3/ticker/24hr',
           {
-            params: { symbol: symbol }
+            params: { symbol: }
           }
         )
 
         item = JSON.parse(res.body)
-        item['sparkline'] = sparkline(symbol: symbol)
+        item['sparkline'] = sparkline(symbol:)
 
-        render_prices(body: item, id: id, asset: asset, quote: quote)
+        render_prices(body: item, id:, asset:, quote:)
       end
 
       def render_prices(body:, id:, asset:, quote:)
@@ -48,15 +48,15 @@ module DataSource
         # TODO: Threads
         quotes.each do |quote|
           symbol = "#{asset['symbol']}#{quote}"
-          res = RestClient.get('https://api.binance.com/api/v3/ticker/24hr', params: { symbol: symbol })
+          res = RestClient.get('https://api.binance.com/api/v3/ticker/24hr', params: { symbol: })
 
           item = JSON.parse(res)
-          item['sparkline'] = sparkline(symbol: symbol)
+          item['sparkline'] = sparkline(symbol:)
 
           result << item
         end
 
-        items = build_price_items(result: result, id: id, asset: asset)
+        items = build_price_items(result:, id:, asset:)
 
         cache_prices(items)
       end
@@ -96,7 +96,7 @@ module DataSource
       def sparkline(symbol:)
         ct = Time.now
         klines_start_time = (Time.new(ct.year, ct.month, ct.day, ct.hour) - 604_800).to_i * 1000
-        klines_params = { symbol: symbol, interval: '1h', startTime: klines_start_time }
+        klines_params = { symbol:, interval: '1h', startTime: klines_start_time }
         res = RestClient.get('https://api.binance.com/api/v3/klines', params: klines_params)
 
         JSON.parse(res).map { |kline| kline[2].to_f }

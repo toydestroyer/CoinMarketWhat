@@ -35,7 +35,7 @@ class EventLog
     Lambda.s3.put_object(
       body: body[event_type].to_json,
       bucket: ENV['LOGS_BUCKET'],
-      key: key
+      key:
     )
   end
 

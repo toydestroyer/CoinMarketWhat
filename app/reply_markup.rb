@@ -30,7 +30,7 @@ class ReplyMarkup
 
     paginated, avaliable_pairs = paginate(list: avaliable_pairs, offset: state.quote_offset)
 
-    pairs = avaliable_pairs.map { |item| build_pair_button(item: item, state: state.dup) }
+    pairs = avaliable_pairs.map { |item| build_pair_button(item:, state: state.dup) }
 
     pairs << pagination_button(state: state.dup, size: total_pairs, row: 'quote') if paginated
 
@@ -42,14 +42,14 @@ class ReplyMarkup
     state.quote = item
 
     {
-      text: text,
+      text:,
       callback_data: state.to_s
     }
   end
 
   def build_data_sources_row(state)
     DataSource::CoinGecko.available_assets[state.base]['tickers'].keys.map do |item|
-      build_data_source_button(item: item, state: state.dup)
+      build_data_source_button(item:, state: state.dup)
     end
   end
 
@@ -66,7 +66,7 @@ class ReplyMarkup
     end
 
     {
-      text: text,
+      text:,
       callback_data: state.to_s
     }
   end

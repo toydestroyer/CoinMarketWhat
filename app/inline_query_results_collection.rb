@@ -3,14 +3,14 @@
 class InlineQueryResultsCollection
   def initialize(query:, chat_type:, user:)
     @results = []
-    selected = Searcher.call(query: query)
+    selected = Searcher.call(query:)
 
     return if selected.empty?
 
     prices = DataSource::CoinGecko.prices(ids: selected.keys, quote: 'USD')
 
     prices.each do |symbol|
-      results << InlineQueryResultArticle.new(symbol: symbol, chat_type: chat_type, user: user)
+      results << InlineQueryResultArticle.new(symbol:, chat_type:, user:)
     end
 
     save!

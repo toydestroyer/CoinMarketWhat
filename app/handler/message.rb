@@ -43,7 +43,7 @@ module Handler
     def process_commands
       bot_commands.each do |bot_command|
         command_class = CommandFinder.by_command(bot_command)
-        command = command_class.new(command: bot_command, user: user, chat: chat)
+        command = command_class.new(command: bot_command, user:, chat:)
         command.process
       end
     end

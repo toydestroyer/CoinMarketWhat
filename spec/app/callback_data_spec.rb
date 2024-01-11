@@ -11,11 +11,11 @@ RSpec.describe CallbackData do
 
   let(:params) do
     {
-      base: base,
-      source: source,
-      source_offset: source_offset,
-      quote: quote,
-      quote_offset: quote_offset
+      base:,
+      source:,
+      source_offset:,
+      quote:,
+      quote_offset:
     }
   end
 

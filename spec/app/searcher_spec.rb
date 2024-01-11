@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Searcher do
-  subject(:op_result) { described_class.call(query: query) }
+  subject(:op_result) { described_class.call(query:) }
 
   context 'with empty query' do
     let(:query) { '' }

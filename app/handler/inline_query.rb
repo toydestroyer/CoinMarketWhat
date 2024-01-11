@@ -20,7 +20,7 @@ module Handler
     end
 
     def params
-      inline_query_results = InlineQueryResultsCollection.new(query: query, chat_type: chat_type, user: user)
+      inline_query_results = InlineQueryResultsCollection.new(query:, chat_type:, user:)
       result = {
         inline_query_id: id,
         results: inline_query_results.to_json,

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.shared_context 'with lambda' do
-  subject(:result) { described_class.call(event: event, context: context) }
+  subject(:result) { described_class.call(event:, context:) }
 
   let(:context) do
     instance_double('LambdaContext',

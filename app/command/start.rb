@@ -10,7 +10,7 @@ module Command
 
     def message
       {
-        text: text,
+        text:,
         parse_mode: 'MarkdownV2',
         disable_web_page_preview: true,
         reply_markup: try_and_share.to_json

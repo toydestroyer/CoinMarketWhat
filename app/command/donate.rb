@@ -4,7 +4,7 @@ module Command
   class Donate < Base
     def message
       {
-        text: text,
+        text:,
         parse_mode: 'MarkdownV2'
       }
     end

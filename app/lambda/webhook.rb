@@ -10,7 +10,7 @@ module Lambda
       super
 
       @body = JSON.parse(event['body'])
-      EventLog.enqueue(event['body'], event_name: event_name)
+      EventLog.enqueue(event['body'], event_name:)
     end
 
     def process

@@ -5,11 +5,11 @@ class Searcher
     def call(query:)
       return top if query.empty?
 
-      exact_match = get_exact_match(query: query)
+      exact_match = get_exact_match(query:)
 
       return exact_match if exact_match.size == 10
 
-      partial_match = get_partial_match(query: query, skip: exact_match.keys)
+      partial_match = get_partial_match(query:, skip: exact_match.keys)
 
       exact_match.merge(partial_match)
     end

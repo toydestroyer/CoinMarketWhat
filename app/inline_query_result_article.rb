@@ -16,8 +16,8 @@ class InlineQueryResultArticle
   def render
     {
       type: :article,
-      id: id,
-      title: title,
+      id:,
+      title:,
       description: "#{price} @ CoinGecko",
       thumb_url: symbol['image'],
       thumb_width: 250,
@@ -25,7 +25,7 @@ class InlineQueryResultArticle
       input_message_content: {
         message_text: "#{title} — #{price}"
       },
-      reply_markup: ReplyMarkup.new(state: state).render
+      reply_markup: ReplyMarkup.new(state:).render
     }
   end
 end

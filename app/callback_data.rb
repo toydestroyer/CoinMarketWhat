@@ -3,7 +3,7 @@
 class CallbackData
   class << self
     def parse(data)
-      validate!(data: data)
+      validate!(data:)
 
       result = data.split(PATTERN).drop(1)
 
@@ -37,7 +37,7 @@ class CallbackData
       next unless DataSource::CoinGecko.available_assets[base]['tickers'].key?(slug)
 
       result[slug] = if slug == source
-                       visible_pairs(data_source: data_source, offset: quote_offset).uniq
+                       visible_pairs(data_source:, offset: quote_offset).uniq
                      else
                        [data_source.matching_pair(id: base, matching: quote)]
                      end
@@ -62,7 +62,7 @@ class CallbackData
 
   def to_s
     data = "#{base}:#{source}[#{source_offset}]:#{quote}[#{quote_offset}]"
-    self.class.validate!(data: data)
+    self.class.validate!(data:)
 
     data
   end

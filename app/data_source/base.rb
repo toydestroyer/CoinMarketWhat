@@ -22,19 +22,19 @@ module DataSource
       end
 
       def pair_offset(id:, quote:)
-        pairs(id: id).index(quote) || 0
+        pairs(id:).index(quote) || 0
       end
 
       def matching_pair(id:, matching:)
-        result = pairs(id: id)
+        result = pairs(id:)
         result.detect { |e| e == matching || (USD_ALL.include?(e) && USD_ALL.include?(matching)) } || result[0]
       end
 
       def prices(ids:, quote:)
-        valid_prices = fetch_cached_prices(ids: ids, quote: quote)
+        valid_prices = fetch_cached_prices(ids:, quote:)
         return render_cached_prices(valid_prices) if valid_prices.size == ids.size
 
-        latest_prices = fetch_prices(ids: ids, quote: quote)
+        latest_prices = fetch_prices(ids:, quote:)
         cache_prices(latest_prices)
 
         latest_prices
@@ -43,11 +43,11 @@ module DataSource
       private
 
       def fetch_cached_prices(ids:, quote:)
-        keys = ids.map { |id| { resource_id: price_id(id: id, quote: quote), resource_type: 'price' } }
+        keys = ids.map { |id| { resource_id: price_id(id:, quote:), resource_type: 'price' } }
         resp = Lambda.dynamodb.batch_get_item(
           request_items: {
             ENV['DYNAMODB_TABLE_NAME'] => {
-              keys: keys
+              keys:
             }
           }
         )
@@ -96,7 +96,7 @@ module DataSource
         resource_id = price_id(id: item['id'], quote: item['quote'])
 
         {
-          resource_id: resource_id,
+          resource_id:,
           resource_type: 'price',
           price: item['current_price'],
           name: item['name'],

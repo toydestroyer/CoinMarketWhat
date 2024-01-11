@@ -14,7 +14,7 @@ class Cacher
     sort_assets
 
     EXCHANGES.each do |exchange|
-      load_tickers(exchange: exchange)
+      load_tickers(exchange:)
     end
 
     save_to_s3
@@ -26,7 +26,7 @@ class Cacher
     page = 1
 
     loop do
-      res = fetch_markets_data(page: page)
+      res = fetch_markets_data(page:)
       body = JSON.parse(res.body)
       break if body.empty?
 
@@ -47,12 +47,12 @@ class Cacher
     page = 1
 
     loop do
-      res = RestClient.get("https://api.coingecko.com/api/v3/exchanges/#{exchange}/tickers", { params: { page: page } })
+      res = RestClient.get("https://api.coingecko.com/api/v3/exchanges/#{exchange}/tickers", { params: { page: } })
       tickers = JSON.parse(res.body)['tickers']
 
       break if tickers.empty?
 
-      tickers.each { |item| populate_tickers(item: item, exchange: exchange) }
+      tickers.each { |item| populate_tickers(item:, exchange:) }
 
       page += 1
     rescue RestClient::ExceptionWithResponse => e
@@ -90,9 +90,9 @@ class Cacher
       {
         params: {
           vs_currency: quote,
-          order: order,
-          per_page: per_page,
-          page: page
+          order:,
+          per_page:,
+          page:
         }
       }
     )

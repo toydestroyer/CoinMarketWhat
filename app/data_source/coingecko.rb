@@ -22,7 +22,7 @@ module DataSource
         # so in order to get more accurate data we should call /coins/{id}/market_chart for any non-USD pair
         if quote != 'USD'
           ids.each do |id|
-            sparklines[id] = sparkline(id: id, quote: quote)
+            sparklines[id] = sparkline(id:, quote:)
           end
         end
 
@@ -43,7 +43,7 @@ module DataSource
         sparklines = {}
         # TODO: Refactor with threads
         quotes.each do |quote|
-          sparklines[quote] = sparkline(id: id, quote: quote)
+          sparklines[quote] = sparkline(id:, quote:)
         end
 
         res = RestClient.get(

@@ -25,7 +25,7 @@ module Lambda
 
       state.visible.each do |slug, quotes|
         data_source = DATA_SOURCES_MAP[slug]
-        data_source.fetch_batch_prices(id: state.base, quotes: quotes)
+        data_source.fetch_batch_prices(id: state.base, quotes:)
       end
     end
   end

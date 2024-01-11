@@ -13,7 +13,7 @@ require (
 )
 
 require (
-	github.com/blend/go-sdk v1.20220411.3 // indirect
+	github.com/blend/go-sdk v2.0.0+incompatible // indirect
 	github.com/cockroachdb/apd v1.1.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect

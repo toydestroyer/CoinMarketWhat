@@ -14,7 +14,7 @@ Style/AsciiComments:
     - ™
 
 Metrics/BlockLength:
-  IgnoredMethods:
+  AllowedMethods:
     - describe
     - context
 

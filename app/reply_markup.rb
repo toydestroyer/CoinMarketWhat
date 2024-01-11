@@ -86,8 +86,8 @@ class ReplyMarkup
   end
 
   def pagination_button(state:, size:, row:)
-    state.send("#{row}_offset=", 0) if state.send("#{row}_offset") >= size
-    state.send("#{row}_offset=", state.send("#{row}_offset") + 1)
+    state.send(:"#{row}_offset=", 0) if state.send(:"#{row}_offset") >= size
+    state.send(:"#{row}_offset=", state.send(:"#{row}_offset") + 1)
 
     {
       text: '→',

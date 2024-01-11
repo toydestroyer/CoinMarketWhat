@@ -20,7 +20,7 @@ class CallbackData
 
   # Telegram Bot API limitation
   MAX_LENGTH = 64
-  PATTERN = /^([\w-]+?):(\w+?)\[(\d+)\]:(\w+?)\[(\d+)\]$/.freeze
+  PATTERN = /^([\w-]+?):(\w+?)\[(\d+)\]:(\w+?)\[(\d+)\]$/
 
   def initialize(base:, source:, quote:, source_offset: 0, quote_offset: 0)
     @base = base

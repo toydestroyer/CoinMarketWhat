@@ -1,39 +1,47 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    activesupport (7.0.7.1)
+    activesupport (7.1.2)
+      base64
+      bigdecimal
       concurrent-ruby (~> 1.0, >= 1.0.2)
+      connection_pool (>= 2.2.5)
+      drb
       i18n (>= 1.6, < 2)
       minitest (>= 5.1)
+      mutex_m
       tzinfo (~> 2.0)
+    base64 (0.2.0)
+    bigdecimal (3.1.5)
     concurrent-ruby (1.2.2)
-    domain_name (0.5.20190701)
-      unf (>= 0.0.5, < 1.0.0)
+    connection_pool (2.4.1)
+    domain_name (0.6.20240107)
+    drb (2.2.0)
+      ruby2_keywords
     http-accept (1.7.0)
     http-cookie (1.0.5)
       domain_name (~> 0.5)
     i18n (1.14.1)
       concurrent-ruby (~> 1.0)
-    mime-types (3.4.1)
+    mime-types (3.5.2)
       mime-types-data (~> 3.2015)
-    mime-types-data (3.2023.0218.1)
+    mime-types-data (3.2023.1205)
     minitest (5.20.0)
     money (6.16.0)
       i18n (>= 0.6.4, <= 2)
+    mutex_m (0.2.0)
     netrc (0.11.0)
     rest-client (2.1.0)
       http-accept (>= 1.7.0, < 2.0)
       http-cookie (>= 1.0.2, < 2.0)
       mime-types (>= 1.16, < 4.0)
       netrc (~> 0.8)
-    sentry-ruby (5.10.0)
+    ruby2_keywords (0.0.5)
+    sentry-ruby (5.16.1)
       concurrent-ruby (~> 1.0, >= 1.0.2)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
-    unf (0.1.4)
-      unf_ext
-    unf_ext (0.0.8.2)
-    zeitwerk (2.6.8)
+    zeitwerk (2.6.12)
 
 PLATFORMS
   x86_64-darwin-22
@@ -50,4 +58,4 @@ RUBY VERSION
    ruby 3.2.2p53
 
 BUNDLED WITH
-   2.4.17
+   2.5.4

@@ -46,14 +46,14 @@ module DataSource
         keys = ids.map { |id| { resource_id: price_id(id:, quote:), resource_type: 'price' } }
         resp = Lambda.dynamodb.batch_get_item(
           request_items: {
-            ENV['DYNAMODB_TABLE_NAME'] => {
+            ENV.fetch('DYNAMODB_TABLE_NAME') => {
               keys:
             }
           }
         )
 
         # TODO: Find a way to filter it out in dyanmo directly
-        resp.responses[ENV['DYNAMODB_TABLE_NAME']].select { |item| Time.now.to_i < item['valid_to'].to_i }
+        resp.responses[ENV.fetch('DYNAMODB_TABLE_NAME')].select { |item| Time.now.to_i < item['valid_to'].to_i }
       end
 
       def cache_prices(items)
@@ -66,7 +66,7 @@ module DataSource
         end
 
         Lambda.dynamodb.batch_write_item(
-          request_items: { ENV['DYNAMODB_TABLE_NAME'] => update }
+          request_items: { ENV.fetch('DYNAMODB_TABLE_NAME') => update }
         )
       end
 

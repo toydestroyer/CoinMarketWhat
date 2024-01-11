@@ -69,7 +69,7 @@ module Lambda
 
     def aws_config
       @aws_config ||= begin
-        config = { region: ENV['AWS_REGION'] }
+        config = { region: ENV.fetch('AWS_REGION') }
         config[:endpoint] = ENV['LOCALSTACK_ENDPOINT'] if ENV.key?('LOCALSTACK_ENDPOINT')
 
         config

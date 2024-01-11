@@ -106,7 +106,7 @@ class Cacher
     Lambda.s3.put_object(
       key: 'coingecko.json',
       body: result.to_json,
-      bucket: ENV['CACHE_BUCKET'],
+      bucket: ENV.fetch('CACHE_BUCKET'),
       storage_class: 'ONEZONE_IA',
       metadata: {
         count: result.size.to_s,

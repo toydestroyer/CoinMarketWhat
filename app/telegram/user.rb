@@ -19,7 +19,7 @@ module Telegram
       return if registered?
 
       Lambda.dynamodb.put_item(
-        table_name: ENV['DYNAMODB_TABLE_NAME'],
+        table_name: ENV.fetch('DYNAMODB_TABLE_NAME'),
         item: params.merge(resource_type: 'telegram/user', resource_id: id.to_s, created_at: Time.now.to_i)
       )
     end
@@ -27,7 +27,7 @@ module Telegram
     def registered?
       @registered ||= begin
         result = Lambda.dynamodb.get_item(
-          table_name: ENV['DYNAMODB_TABLE_NAME'],
+          table_name: ENV.fetch('DYNAMODB_TABLE_NAME'),
           key: { resource_type: 'telegram/user', resource_id: id.to_s }
         )
 

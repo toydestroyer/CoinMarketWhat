@@ -2,20 +2,20 @@
 
 RSpec.configure do |config|
   config.before(:suite) do
-    Lambda.s3.create_bucket(bucket: ENV['LOGS_BUCKET'])
-    Lambda.s3.create_bucket(bucket: ENV['CACHE_BUCKET'])
-    Lambda.s3.put_object(key: 'coingecko.json', bucket: ENV['CACHE_BUCKET'], body: file_fixture('coingecko.json'))
+    Lambda.s3.create_bucket(bucket: ENV.fetch('LOGS_BUCKET'))
+    Lambda.s3.create_bucket(bucket: ENV.fetch('CACHE_BUCKET'))
+    Lambda.s3.put_object(key: 'coingecko.json', bucket: ENV.fetch('CACHE_BUCKET'), body: file_fixture('coingecko.json'))
   end
 
   config.after(:suite) do
-    Lambda.s3.delete_bucket(bucket: ENV['LOGS_BUCKET'])
+    Lambda.s3.delete_bucket(bucket: ENV.fetch('LOGS_BUCKET'))
 
-    empty_bucket(ENV['CACHE_BUCKET'])
-    Lambda.s3.delete_bucket(bucket: ENV['CACHE_BUCKET'])
+    empty_bucket(ENV.fetch('CACHE_BUCKET'))
+    Lambda.s3.delete_bucket(bucket: ENV.fetch('CACHE_BUCKET'))
   end
 
   config.after do
-    empty_bucket(ENV['LOGS_BUCKET'])
+    empty_bucket(ENV.fetch('LOGS_BUCKET'))
 
     # Remove all objects across all buckets after each example
     # Lambda.s3.list_buckets.buckets.each do |bucket|

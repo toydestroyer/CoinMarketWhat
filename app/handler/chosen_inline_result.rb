@@ -8,7 +8,7 @@ module Handler
       super
 
       Lambda.dynamodb.put_item(
-        table_name: ENV['DYNAMODB_TABLE_NAME'],
+        table_name: ENV.fetch('DYNAMODB_TABLE_NAME'),
         item: inline_query_result.merge(
           resource_type: 'telegram/inline_message',
           resource_id: payload['inline_message_id'],
@@ -27,7 +27,7 @@ module Handler
 
     def inline_query_result
       result = Lambda.dynamodb.get_item(
-        table_name: ENV['DYNAMODB_TABLE_NAME'],
+        table_name: ENV.fetch('DYNAMODB_TABLE_NAME'),
         key: { resource_type: 'telegram/inline_query_result', resource_id: payload['result_id'] }
       ).item
 

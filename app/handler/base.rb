@@ -10,7 +10,7 @@ module Handler
     end
 
     def process
-      puts RestClient.post("https://api.telegram.org/bot#{ENV['TELEGRAM_BOT_API_TOKEN']}/#{method_name}", params)
+      puts RestClient.post("https://api.telegram.org/bot#{ENV.fetch('TELEGRAM_BOT_API_TOKEN')}/#{method_name}", params)
     end
 
     def respond

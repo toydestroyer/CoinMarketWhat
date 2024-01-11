@@ -17,7 +17,7 @@ module Lambda
 
     def answer_callback_query(id)
       puts RestClient.post(
-        "https://api.telegram.org/bot#{ENV['TELEGRAM_BOT_API_TOKEN']}/answerCallbackQuery",
+        "https://api.telegram.org/bot#{ENV.fetch('TELEGRAM_BOT_API_TOKEN')}/answerCallbackQuery",
         callback_query_id: id
       )
     rescue RestClient::ExceptionWithResponse => e

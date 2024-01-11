@@ -66,7 +66,7 @@ module DataSource
       end
 
       def load_assets
-        JSON.parse(Lambda.s3.get_object(bucket: ENV['CACHE_BUCKET'], key: "#{slug}.json").body.read)
+        JSON.parse(Lambda.s3.get_object(bucket: ENV.fetch('CACHE_BUCKET'), key: "#{slug}.json").body.read)
       end
 
       def vs_currencies

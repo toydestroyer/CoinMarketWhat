@@ -42,7 +42,7 @@ class InlineQueryResultsCollection
         }
       end
 
-      Lambda.dynamodb.batch_write_item(request_items: { ENV['DYNAMODB_TABLE_NAME'] => batch_items })
+      Lambda.dynamodb.batch_write_item(request_items: { ENV.fetch('DYNAMODB_TABLE_NAME') => batch_items })
     end
   end
 end

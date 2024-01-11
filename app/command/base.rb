@@ -21,7 +21,7 @@ module Command
     def process
       params = message.merge(chat_id: chat['id'])
 
-      puts RestClient.post("https://api.telegram.org/bot#{ENV['TELEGRAM_BOT_API_TOKEN']}/#{method_name}", params)
+      puts RestClient.post("https://api.telegram.org/bot#{ENV.fetch('TELEGRAM_BOT_API_TOKEN')}/#{method_name}", params)
     end
   end
 end

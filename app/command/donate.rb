@@ -18,7 +18,7 @@ module Command
     end
 
     def addresses_list
-      JSON.parse(ENV['DONATION_ADDRESS']).map { |k, v| "#{k}: `#{v}`" }.join("\n")
+      JSON.parse(ENV.fetch('DONATION_ADDRESS')).map { |k, v| "#{k}: `#{v}`" }.join("\n")
     end
   end
 end

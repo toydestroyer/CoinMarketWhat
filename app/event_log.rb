@@ -6,7 +6,7 @@ class EventLog
       puts event
 
       Lambda.sns.publish(
-        topic_arn: ENV['EVENTS_TOPIC'],
+        topic_arn: ENV.fetch('EVENTS_TOPIC'),
         message: event,
         message_attributes: {
           event_name: {
@@ -34,7 +34,7 @@ class EventLog
   def save
     Lambda.s3.put_object(
       body: body[event_type].to_json,
-      bucket: ENV['LOGS_BUCKET'],
+      bucket: ENV.fetch('LOGS_BUCKET'),
       key:
     )
   end

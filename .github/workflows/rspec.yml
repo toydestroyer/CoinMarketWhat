@@ -25,7 +25,7 @@ jobs:
           LOCALSTACK_ENDPOINT: http://localhost:4566
           AWS_ACCESS_KEY_ID: test
           AWS_SECRET_ACCESS_KEY: test
-          AWS_REGION: test
+          AWS_REGION: ap-southeast-1
           LOGS_BUCKET: logs-bucket
           CACHE_BUCKET: cache-bucket
         run: |

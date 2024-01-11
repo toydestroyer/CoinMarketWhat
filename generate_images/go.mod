@@ -17,6 +17,6 @@ require (
 	github.com/cockroachdb/apd v1.1.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/shopspring/decimal v0.0.0-20180709203117-cd690d0c9e24 // indirect
+	github.com/shopspring/decimal v1.3.1 // indirect
 	golang.org/x/image v0.11.0 // indirect
 )

@@ -16,8 +16,8 @@ class InlineQueryResultsCollection
     save!
   end
 
-  def to_json(*args)
-    JSON.generate(results.map(&:render), *args)
+  def to_json(*)
+    JSON.generate(results.map(&:render), *)
   end
 
   private

@@ -13,7 +13,8 @@ RSpec.describe Lambda::Logger, :with_lambda do
   it 'saves object with correct key' do
     result
 
-    object = s3.get_object(bucket: ENV.fetch('LOGS_BUCKET'), key: 'callback_query/year=2021/month=05/day=18/hour=12/1.json')
+    key = 'callback_query/year=2021/month=05/day=18/hour=12/1.json'
+    object = s3.get_object(bucket: ENV.fetch('LOGS_BUCKET'), key:)
     expect(object).to be_any
   end
 end

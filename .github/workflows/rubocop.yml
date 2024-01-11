@@ -5,10 +5,10 @@ jobs:
     name: runner / rubocop
     runs-on: ubuntu-latest
     steps:
-      - name: Check out code
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: 3.2.2
+          bundler-cache: true
       - name: rubocop
         uses: reviewdog/action-rubocop@v2

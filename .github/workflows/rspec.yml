@@ -11,9 +11,8 @@ jobs:
         env:
           SERVICES: dynamodb,sns,sqs,s3
     steps:
-      - uses: actions/checkout@v2
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
         with:
           ruby-version: 3.2.2
           bundler-cache: true

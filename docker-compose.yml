@@ -12,7 +12,7 @@ services:
       - LOCALSTACK_ENDPOINT=http://localstack:4566
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
-      - AWS_REGION=test
+      - AWS_REGION=ap-southeast-1
       - LOGS_BUCKET=logs-bucket
       - CACHE_BUCKET=cache-bucket
       - TELEGRAM_BOT_API_TOKEN=123:token

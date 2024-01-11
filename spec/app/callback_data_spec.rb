@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe CallbackData do
-  subject(:result) { described_class.new(params) }
+  subject(:result) { described_class.new(**params) }
 
   let(:base) { 'bitcoin' }
   let(:source) { 'coingecko' }

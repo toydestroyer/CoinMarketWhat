@@ -46,7 +46,7 @@ GEM
     crack (0.4.5)
       rexml
     diff-lcs (1.5.0)
-    domain_name (0.6.20231109)
+    domain_name (0.6.20240107)
     drb (2.2.0)
       ruby2_keywords
     hashdiff (1.1.0)

@@ -1,4 +1,7 @@
-![CoinMarketWhat](misc/logo_main_64.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="media/logo_main_dark.svg">
+  <img alt="CoinMarketWhat!?" src="media/logo_main_light.svg">
+</picture>
 
 # CoinMarketWhat!? ![](https://github.com/toydestroyer/CoinMarketWhat/actions/workflows/rubocop.yml/badge.svg) ![](https://github.com/toydestroyer/CoinMarketWhat/actions/workflows/rspec.yml/badge.svg)
 Inline Telegram bot to answer "How much is %shitcoin% right now?" kind of questions.

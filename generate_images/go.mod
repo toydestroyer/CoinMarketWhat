@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/aws/aws-lambda-go v1.45.0
-	github.com/aws/aws-sdk-go v1.50.4
+	github.com/aws/aws-sdk-go v1.50.20
 	github.com/fogleman/gg v1.3.0
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/leekchan/accounting v1.0.0

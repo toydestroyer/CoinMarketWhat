@@ -124,7 +124,8 @@ GEM
     rubocop-thread_safety (0.5.1)
       rubocop (>= 0.90.0)
     ruby-progressbar (1.13.0)
-    sentry-ruby (5.16.1)
+    sentry-ruby (5.17.3)
+      bigdecimal
       concurrent-ruby (~> 1.0, >= 1.0.2)
     strscan (3.1.0)
     tzinfo (2.0.6)

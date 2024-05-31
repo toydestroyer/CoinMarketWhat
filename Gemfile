@@ -2,7 +2,7 @@
 
 source 'https://rubygems.org'
 
-ruby '~> 3.2.3'
+ruby file: '.ruby-version'
 
 gem 'aws-sdk-dynamodb'
 gem 'aws-sdk-s3'

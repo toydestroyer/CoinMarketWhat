@@ -66,7 +66,7 @@ GEM
       i18n (>= 0.6.4, <= 2)
     mutex_m (0.2.0)
     netrc (0.11.0)
-    parallel (1.24.0)
+    parallel (1.26.2)
     parser (3.3.2.0)
       ast (~> 2.4.1)
       racc

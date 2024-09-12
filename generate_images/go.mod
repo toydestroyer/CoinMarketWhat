@@ -17,5 +17,5 @@ require (
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
-	golang.org/x/image v0.18.0 // indirect
+	golang.org/x/image v0.20.0 // indirect
 )

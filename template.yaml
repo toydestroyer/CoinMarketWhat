@@ -243,10 +243,12 @@ Resources:
                 - callback_query
   GenerateImagesFunction:
     Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: go1.x
     Properties:
       CodeUri: generate_images/
-      Handler: generate-images
-      Runtime: go1.x
+      Handler: bootstrap
+      Runtime: provided.al2
       MemorySize: 2048
       Architectures:
         - x86_64

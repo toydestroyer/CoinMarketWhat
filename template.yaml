@@ -251,7 +251,7 @@ Resources:
       Runtime: provided.al2
       MemorySize: 2048
       Architectures:
-        - x86_64
+        - arm64
       Policies:
         - AWSLambdaBasicExecutionRole
         - Version: "2012-10-17"

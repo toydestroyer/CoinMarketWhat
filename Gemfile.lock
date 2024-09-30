@@ -115,7 +115,7 @@ GEM
       rubocop (>= 0.90.0)
     ruby-progressbar (1.13.0)
     securerandom (0.3.1)
-    sentry-ruby (5.19.0)
+    sentry-ruby (5.20.1)
       bigdecimal
       concurrent-ruby (~> 1.0, >= 1.0.2)
     tzinfo (2.0.6)
